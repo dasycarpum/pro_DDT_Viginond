@@ -1,20 +1,25 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# Introduction
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+La gestion des inondations lors d'un cellule de crise en Préfecture demande à l'agent d'astreinte une connaissance approfondie dans plusieurs domaines techniques, pour fournir des éléments pertinents en un temps restreint.
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+L'objectif de cette application est d'agréger toutes les informations connues, et dégager les axes prioritaires d'intervention des services. Ainsi sur base des données suivantes :
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+    ▪ les hauteurs d'eau en temps réel aux stations de mesure (site https://www.vigicrues.gouv.fr/)
+    ▪ la modélisation des crues par le CEREMA
+    ▪ les plans de prévention des risques et les atlas des zones inondables de la DDT de la Moselle
+    ▪ les listes des enjeux ponctuels, linéaires et surfaciques produites par la DDT de la Moselle
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+l'application, de type IHM, assiste l'utilisateur en lui fournissant de manière semi-automatisée :
+
+    ▪ un visuel instantanné sur le profil de la crue du cours d'eau ainsi que de ses affluents,
+    ▪ une projection des hauteurs d'eau à t +4 heures, 
+    ▪ une cartograhie dynamique de l'emprise modélisée de la crue, et des enjeux matériels & humains.
+
+# Environnement de développement
+
+    ▪ Langage : C++11
+    ▪ Framework : Qt (version 5.12.6)
+    ▪ IDE : Qt Creator (version 4.10.2)
+    ▪ Bibliothèque complémentaire : qwt (version 6.1.5)
+    ▪ Gestionnaire de versions du code : Git (version 2.28.0)
+    ▪ Plateforme applicative : Azure Devops sous https://dev.azure.com/dasycarpum-pro-DDT/Viginond%2057
