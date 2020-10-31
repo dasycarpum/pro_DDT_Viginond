@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+#include "reseau.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class FenetrePrincipale; }
 QT_END_NAMESPACE

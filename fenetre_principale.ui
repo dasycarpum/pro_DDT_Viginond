@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>982</width>
-    <height>680</height>
+    <width>1024</width>
+    <height>807</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,18 +27,18 @@
        <string>Requêtes utilisateur</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_requete">
-       <item row="0" column="0">
-        <widget class="QLineEdit" name="lineEdit_internet">
-         <property name="minimumSize">
-          <size>
-           <width>280</width>
-           <height>0</height>
-          </size>
+       <item row="2" column="0">
+        <widget class="QPushButton" name="pushButton_telechargement">
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
          </property>
-         <property name="readOnly">
-          <bool>true</bool>
+         <property name="text">
+          <string>Téléchargement des données Vigicrues</string>
          </property>
         </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QTextBrowser" name="textBrowser_vigicrues"/>
        </item>
        <item row="1" column="0">
         <widget class="QGroupBox" name="groupBox_proxy">
@@ -104,18 +104,21 @@
          </layout>
         </widget>
        </item>
-       <item row="2" column="0">
-        <widget class="QPushButton" name="pushButton_telechargement">
-         <property name="cursor">
-          <cursorShape>PointingHandCursor</cursorShape>
+       <item row="0" column="0">
+        <widget class="QTextBrowser" name="textBrowser_internet">
+         <property name="minimumSize">
+          <size>
+           <width>280</width>
+           <height>0</height>
+          </size>
          </property>
-         <property name="text">
-          <string>Téléchargement des données Vigicrues</string>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>23</height>
+          </size>
          </property>
         </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QTextBrowser" name="textBrowser_vigicrues"/>
        </item>
        <item row="4" column="0">
         <widget class="QGroupBox" name="groupBox_bassin_versant">
@@ -170,7 +173,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>982</width>
+     <width>1024</width>
      <height>21</height>
     </rect>
    </property>
