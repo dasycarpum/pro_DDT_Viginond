@@ -36,6 +36,8 @@ void FenetrePrincipale::Telechargement_Vigicrues()
     QList<QString> liste_noeud_xml; liste_noeud_xml << "DtObsHydro" << "ResObsHydro";
     QVector<QVector<QString>> hauteurs_horaires_str = FichierXml::Lecture_valeur(reseau->Donnee_page_web(), liste_noeud_xml);
 
+    delete reseau;
+
     /* Typage des chaînes de caractères (QString) du tableau 2D : conversion des 2 champs en 'QDateTime' et 'double' */
     QMap<QDateTime, double> hauteurs_horaires;
 
@@ -52,9 +54,22 @@ void FenetrePrincipale::Telechargement_Vigicrues()
         hauteurs_horaires[dt] = h;
     }
 
-    // qDebug() << hauteurs_horaires.lastKey() << hauteurs_horaires.last();
+    /* Affichage du résultat (dernier relevé de hauteur) */
+    if (!hauteurs_horaires.isEmpty())
+        ui->textBrowser_vigicrues->append(QString("<TABLE BORDER WIDTH=220 align=center CELLSPACING=1>"
+                                                  "<TR><TD WIDTH=120 BGCOLOR=#%1 align=left>%2</TD>"
+                                                  "<TD WIDTH=60 align=center>%3</TD>"
+                                                  "<TD WIDTH=50 align=center>%L4 mm</TD></TR></TABLE>")
+                                                    .arg("08CA79")
+                                                    .arg("Station Metz")
+                                                    .arg(hauteurs_horaires.lastKey().toString(Qt::ISODate))
+                                                    .arg(hauteurs_horaires.last()));
+    else
+        ui->textBrowser_vigicrues->append(QString("<TABLE BORDER WIDTH=220 align=center CELLSPACING=1>"
+                                                  "<TR><TD WIDTH=120 align=left><font color=darkRed>%1</font></TD>"
+                                                  "<TD WIDTH=110 align=center><font color=darkRed>Donnée absente !</font></TD></TR></TABLE>")
+                                                    .arg("Station ?"));
 
 
-    delete reseau;
 
 }
