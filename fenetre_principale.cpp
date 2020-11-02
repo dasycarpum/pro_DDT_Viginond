@@ -20,6 +20,10 @@ FenetrePrincipale::FenetrePrincipale(QWidget *parent)
 
     /* Enregistrement des données Vigicrues */
     connect(ui->pushButton_telechargement, SIGNAL(clicked()), this, SLOT(Telechargement_Vigicrues()));
+
+    /* Connexion des radioButton 'bassin versant' pour la visualisation des données */
+    grp_radioButton_bassin = new QButtonGroup(ui->groupBox_bassin_versant);
+    connect(grp_radioButton_bassin, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(Selection_bassin_versant(QAbstractButton *)));
 }
 
 FenetrePrincipale::~FenetrePrincipale()
@@ -82,4 +86,37 @@ void FenetrePrincipale::Telechargement_Vigicrues(void)
                                                       "<TD WIDTH=110 align=center><font color=darkRed>Donnée absente !</font></TD></TR></TABLE>")
                                                         .arg(stations_hydro[i]->Identifiant().second));
     }
+    /* Instanciation des radioButtons des bassins versants du territoire */
+    Affichage_radioButton_bassin();
+}
+
+/** Instanciation des radioButtons 'bassin versant'
+    =============================================== */
+void FenetrePrincipale::Affichage_radioButton_bassin(void)
+{
+    int k(0), maxColonne(2);
+
+    for (int i(0); i < stations_hydro.size(); ++i){
+        if (i == 0 || stations_hydro[i]->Bassin_versant() != stations_hydro[i-1]->Bassin_versant()){
+            QRadioButton *radioButton = new QRadioButton(stations_hydro[i]->Bassin_versant());
+            radioButton->setIcon(QIcon(QCoreApplication::applicationDirPath() + "/databank/pictogramme/" + radioButton->text() + ".png"));
+
+            grp_radioButton_bassin->addButton(radioButton);
+
+            int ligne = k / maxColonne;
+            int colonne = k % maxColonne;
+            ui->gridLayout_bassin_versant->addWidget(radioButton, ligne, colonne);
+            ++k;
+        }
+    }
+
+    /* Empêcher un 2e téléchargement */
+    ui->pushButton_telechargement->setDisabled(true);
+}
+
+/** Sélection d'un bassin versant, pour visualisation sous format graphique et tableau des crues
+    ============================================================================================ */
+void FenetrePrincipale::Selection_bassin_versant(QAbstractButton * rb)
+{
+    qDebug() << rb->text();
 }

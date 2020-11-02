@@ -2,6 +2,8 @@
 #define FENETREPRINCIPALE_H
 
 #include <QMainWindow>
+#include <QButtonGroup>
+#include <QRadioButton>
 
 #include "reseau.h"
 #include "fichier.h"
@@ -17,13 +19,17 @@ class FenetrePrincipale : public QMainWindow
     Ui::FenetrePrincipale *ui;
 
     QList<StationHydro *> stations_hydro;
+    QButtonGroup *grp_radioButton_bassin;
 
 public:
     FenetrePrincipale(QWidget *parent = nullptr);
     ~FenetrePrincipale();
 
+    void Affichage_radioButton_bassin(void);
+
 public slots:
     void Telechargement_Vigicrues(void);
+    void Selection_bassin_versant(QAbstractButton *);
 
 };
 #endif // FENETREPRINCIPALE_H
