@@ -20,12 +20,14 @@ SOURCES += \
     fichier.cpp \
     main.cpp \
     fenetre_principale.cpp \
-    reseau.cpp
+    reseau.cpp \
+    station_hydro.cpp
 
 HEADERS += \
     fenetre_principale.h \
     fichier.h \
-    reseau.h
+    reseau.h \
+    station_hydro.h
 
 FORMS += \
     fenetre_principale.ui
