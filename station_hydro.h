@@ -45,7 +45,9 @@ public:
     /* Mutateur */
     void Hauteurs_horaires(QMap<QDateTime, double> hh) {hauteurs_horaires = hh;}
 
+    /* Méthodes */
     static QList<StationHydro *> Liste_stations_hydro(void);
+    QVector<QPointF> Hauteurs_horaires_courbe(void);
 };
 
 #endif // STATIONHYDRO_H

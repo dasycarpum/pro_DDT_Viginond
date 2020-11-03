@@ -53,3 +53,17 @@ QList<StationHydro *> StationHydro::Liste_stations_hydro(void)
 
     return stations_hydro;
 }
+
+/** Convertit les hauteurs horaires en tableau de points xy, et permettre de tracer la courbe du graphe
+    =================================================================================================== */
+QVector<QPointF> StationHydro::Hauteurs_horaires_courbe(void)
+{
+    QVector<QPointF> xy;
+
+    for (QMap<QDateTime, double>::const_iterator it = hauteurs_horaires.cbegin(); it != hauteurs_horaires.cend(); ++it){
+        QPointF point (it.key().toTime_t(), it.value());
+        xy.push_back(point);
+    }
+
+    return xy;
+}

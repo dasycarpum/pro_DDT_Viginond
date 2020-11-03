@@ -4,6 +4,11 @@
 #include <QMainWindow>
 #include <QButtonGroup>
 #include <QRadioButton>
+#include <qwt_plot.h>
+#include <qwt_plot_curve.h>
+#include <qwt_legend.h>
+#include <qwt_plot_grid.h>
+#include <qwt_scale_draw.h>
 
 #include "reseau.h"
 #include "fichier.h"

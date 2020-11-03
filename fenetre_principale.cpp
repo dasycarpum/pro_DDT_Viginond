@@ -114,9 +114,57 @@ void FenetrePrincipale::Affichage_radioButton_bassin(void)
     ui->pushButton_telechargement->setDisabled(true);
 }
 
+class EchelleHoraire : public QwtScaleDraw
+{
+    virtual QwtText label(double v) const
+    {
+        QDateTime t = QDateTime::fromTime_t(static_cast<uint>(v));
+        return t.toString("dd MMM");
+    }
+};
+
+
 /** Sélection d'un bassin versant, pour visualisation sous format graphique et tableau des crues
     ============================================================================================ */
 void FenetrePrincipale::Selection_bassin_versant(QAbstractButton * rb)
 {
-    qDebug() << rb->text();
+    /* Graphique : présentation */
+    QwtPlot *graph_entite_hydro = new QwtPlot(this);
+    graph_entite_hydro->setTitle("Bassin versant " + rb->text() + " - cours d'eau " +  stations_hydro[0]->Entite_hydrologique().second);
+    //graph_entite_hydro->setAxisTitle(QwtPlot::xBottom, "Temps");
+    graph_entite_hydro->setAxisTitle(QwtPlot::yLeft, "Hauteur eau (mm)");
+    graph_entite_hydro->setCanvasBackground(QBrush(QColor("#f5ebd5")));
+
+    /* Format de l'échelle */
+    EchelleHoraire * x = new EchelleHoraire();
+    x->setLabelRotation(-45);
+    graph_entite_hydro->setAxisScaleDraw(QwtPlot::xBottom, x);
+
+    /* Grille */
+    QwtPlotGrid *grille = new QwtPlotGrid();
+    grille->setPen(QPen(Qt::darkGray, 0 , Qt::DotLine));
+    grille->attach(graph_entite_hydro);
+
+    /* Courbes */
+    QVector<QString> titre = {stations_hydro[0]->Identifiant().second};
+    QVector<QColor> couleur = {Qt::red};
+
+    auto tuple = std::make_tuple(titre, couleur);
+
+    for (int i(0); i < titre.size(); ++i){
+        QwtPlotCurve *curve_station = new QwtPlotCurve( std::get<0>(tuple).at(i) );
+        curve_station->setSamples(stations_hydro[0]->Hauteurs_horaires_courbe());
+        curve_station->setCurveAttribute(QwtPlotCurve::Fitted);
+        curve_station->setPen(QColor( std::get<1>(tuple).at(i) ), 2);
+        curve_station->setLegendAttribute( QwtPlotCurve::LegendShowLine );
+        curve_station->attach(graph_entite_hydro);
+    }
+
+    /* Légende */
+    QwtLegend *legend = new QwtLegend();
+    graph_entite_hydro->insertLegend(legend, QwtPlot::RightLegend);
+
+    /* Insertion du graphique */
+    ui->tabWidget_graphique->addTab(graph_entite_hydro, stations_hydro[0]->Entite_hydrologique().second);
+    graph_entite_hydro->replot();
 }
