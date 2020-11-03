@@ -128,9 +128,15 @@ class EchelleHoraire : public QwtScaleDraw
     ============================================================================================ */
 void FenetrePrincipale::Selection_bassin_versant(QAbstractButton * rb)
 {
+    /* Sélection des stations appartenant au même cours d'eau */
+    QList<StationHydro *> stations_par_cours_d_eau;
+    for (int i(0); i < stations_hydro.size(); ++i)
+        if (stations_hydro[i]->Entite_hydrologique().second == "La Moselle")
+            stations_par_cours_d_eau.append(stations_hydro[i]);
+
     /* Graphique : présentation */
     QwtPlot *graph_entite_hydro = new QwtPlot(this);
-    graph_entite_hydro->setTitle("Bassin versant " + rb->text() + " - cours d'eau " +  stations_hydro[0]->Entite_hydrologique().second);
+    graph_entite_hydro->setTitle("Bassin versant " + rb->text() + " - cours d'eau " +  stations_par_cours_d_eau[0]->Entite_hydrologique().second);
     //graph_entite_hydro->setAxisTitle(QwtPlot::xBottom, "Temps");
     graph_entite_hydro->setAxisTitle(QwtPlot::yLeft, "Hauteur eau (mm)");
     graph_entite_hydro->setCanvasBackground(QBrush(QColor("#f5ebd5")));
@@ -146,16 +152,12 @@ void FenetrePrincipale::Selection_bassin_versant(QAbstractButton * rb)
     grille->attach(graph_entite_hydro);
 
     /* Courbes */
-    QVector<QString> titre = {stations_hydro[0]->Identifiant().second};
-    QVector<QColor> couleur = {Qt::red};
-
-    auto tuple = std::make_tuple(titre, couleur);
-
-    for (int i(0); i < titre.size(); ++i){
-        QwtPlotCurve *curve_station = new QwtPlotCurve( std::get<0>(tuple).at(i) );
-        curve_station->setSamples(stations_hydro[0]->Hauteurs_horaires_courbe());
+    QStringList couleurs; couleurs << "maroon" << "gold" << "green";
+    for (int i(0); i < stations_par_cours_d_eau.size(); ++i){
+        QwtPlotCurve *curve_station = new QwtPlotCurve( stations_par_cours_d_eau[i]->Identifiant().second );
+        curve_station->setSamples(stations_par_cours_d_eau[i]->Hauteurs_horaires_courbe());
         curve_station->setCurveAttribute(QwtPlotCurve::Fitted);
-        curve_station->setPen(QColor( std::get<1>(tuple).at(i) ), 2);
+        curve_station->setPen(QColor( couleurs[i] ), 2);
         curve_station->setLegendAttribute( QwtPlotCurve::LegendShowLine );
         curve_station->attach(graph_entite_hydro);
     }
@@ -165,6 +167,6 @@ void FenetrePrincipale::Selection_bassin_versant(QAbstractButton * rb)
     graph_entite_hydro->insertLegend(legend, QwtPlot::RightLegend);
 
     /* Insertion du graphique */
-    ui->tabWidget_graphique->addTab(graph_entite_hydro, stations_hydro[0]->Entite_hydrologique().second);
+    ui->tabWidget_graphique->addTab(graph_entite_hydro, stations_par_cours_d_eau[0]->Entite_hydrologique().second);
     graph_entite_hydro->replot();
 }
