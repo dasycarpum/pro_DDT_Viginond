@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QButtonGroup>
 #include <QRadioButton>
+#include <QRandomGenerator>
+
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 #include <qwt_legend.h>
@@ -31,6 +33,7 @@ public:
     ~FenetrePrincipale();
 
     void Affichage_radioButton_bassin(void);
+    void Affichage_graphique(QString const&, QString const&, QList<StationHydro *> const&);
 
 public slots:
     void Telechargement_Vigicrues(void);
