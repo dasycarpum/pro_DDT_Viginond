@@ -4,15 +4,12 @@
 #include <QMainWindow>
 #include <QButtonGroup>
 #include <QRadioButton>
-#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
-#include <qwt_legend.h>
-#include <qwt_plot_grid.h>
-#include <qwt_scale_draw.h>
+#include <QRandomGenerator>
 
 #include "reseau.h"
 #include "fichier.h"
 #include "station_hydro.h"
+#include "graphique.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class FenetrePrincipale; }
@@ -31,6 +28,7 @@ public:
     ~FenetrePrincipale();
 
     void Affichage_radioButton_bassin(void);
+    void Affichage_graphique(QString const&, QString const&, QList<StationHydro *> const&);
 
 public slots:
     void Telechargement_Vigicrues(void);

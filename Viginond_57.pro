@@ -19,6 +19,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     fichier.cpp \
+    graphique.cpp \
     main.cpp \
     fenetre_principale.cpp \
     reseau.cpp \
@@ -27,6 +28,7 @@ SOURCES += \
 HEADERS += \
     fenetre_principale.h \
     fichier.h \
+    graphique.h \
     reseau.h \
     station_hydro.h
 

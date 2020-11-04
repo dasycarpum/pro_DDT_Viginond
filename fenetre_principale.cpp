@@ -114,32 +114,46 @@ void FenetrePrincipale::Affichage_radioButton_bassin(void)
     ui->pushButton_telechargement->setDisabled(true);
 }
 
-class EchelleHoraire : public QwtScaleDraw
-{
-    virtual QwtText label(double v) const
-    {
-        QDateTime t = QDateTime::fromTime_t(static_cast<uint>(v));
-        return t.toString("dd MMM");
-    }
-};
-
-
 /** Sélection d'un bassin versant, pour visualisation sous format graphique et tableau des crues
     ============================================================================================ */
 void FenetrePrincipale::Selection_bassin_versant(QAbstractButton * rb)
 {
-    /* Sélection des stations appartenant au même cours d'eau */
-    QList<StationHydro *> stations_par_cours_d_eau;
-    for (int i(0); i < stations_hydro.size(); ++i)
-        if (stations_hydro[i]->Entite_hydrologique().second == "La Moselle")
-            stations_par_cours_d_eau.append(stations_hydro[i]);
+    ui->tabWidget_graphique->clear();
 
+    /* Sélection des cours d'eau appartenant au même bassin versant */
+    QMap<int, QString>cours_d_eau;
+    for (int i(0); i < stations_hydro.size(); ++i)
+        if (stations_hydro[i]->Bassin_versant() == rb->text())
+            cours_d_eau[stations_hydro[i]->Sens_affluent()] = stations_hydro[i]->Entite_hydrologique().second;
+
+    for (QMap<int, QString>::const_iterator it = cours_d_eau.cbegin(); it != cours_d_eau.cend(); ++it){
+
+        /* Sélection des stations appartenant au même cours d'eau */
+        QList<StationHydro *> stations_par_cours_d_eau;
+        for (int i(0); i < stations_hydro.size(); ++i)
+            if (stations_hydro[i]->Bassin_versant() == rb->text()
+                    && stations_hydro[i]->Entite_hydrologique().second == it.value())
+                stations_par_cours_d_eau.append(stations_hydro[i]);
+
+        /* Affichage */
+        Affichage_graphique(rb->text(), it.value(), stations_par_cours_d_eau);
+    }
+}
+
+void FenetrePrincipale::Affichage_graphique(QString const& bassin_versant, QString const& cours_d_eau, QList<StationHydro *> const& stations_par_cours_d_eau)
+{
     /* Graphique : présentation */
     QwtPlot *graph_entite_hydro = new QwtPlot(this);
-    graph_entite_hydro->setTitle("Bassin versant " + rb->text() + " - cours d'eau " +  stations_par_cours_d_eau[0]->Entite_hydrologique().second);
-    //graph_entite_hydro->setAxisTitle(QwtPlot::xBottom, "Temps");
+    graph_entite_hydro->setTitle("Bassin versant " + bassin_versant + " - cours d'eau " +  cours_d_eau);
     graph_entite_hydro->setAxisTitle(QwtPlot::yLeft, "Hauteur eau (mm)");
-    graph_entite_hydro->setCanvasBackground(QBrush(QColor("#f5ebd5")));
+    graph_entite_hydro->setCanvasBackground(QBrush(QColor("#e5e6e2")));
+
+    /* Gestion du zoom et de l'étiquette mobile de données */
+    Zoom* zoom = new Zoom( graph_entite_hydro->canvas() );
+    zoom->setMousePattern( QwtEventPattern::MouseSelect2,
+        Qt::RightButton, Qt::ControlModifier );
+    zoom->setMousePattern( QwtEventPattern::MouseSelect3,
+        Qt::RightButton );
 
     /* Format de l'échelle */
     EchelleHoraire * x = new EchelleHoraire();
@@ -149,17 +163,15 @@ void FenetrePrincipale::Selection_bassin_versant(QAbstractButton * rb)
     /* Grille */
     QwtPlotGrid *grille = new QwtPlotGrid();
     grille->setPen(QPen(Qt::darkGray, 0 , Qt::DotLine));
-    grille->attach(graph_entite_hydro);
+    grille->attach( graph_entite_hydro );
 
     /* Courbes */
-    QStringList couleurs; couleurs << "maroon" << "gold" << "green";
     for (int i(0); i < stations_par_cours_d_eau.size(); ++i){
         QwtPlotCurve *curve_station = new QwtPlotCurve( stations_par_cours_d_eau[i]->Identifiant().second );
-        curve_station->setSamples(stations_par_cours_d_eau[i]->Hauteurs_horaires_courbe());
-        curve_station->setCurveAttribute(QwtPlotCurve::Fitted);
-        curve_station->setPen(QColor( couleurs[i] ), 2);
+        curve_station->setSamples( stations_par_cours_d_eau[i]->Hauteurs_horaires_courbe() );
+        curve_station->setPen(QColor(QColor::fromRgb(QRandomGenerator::global()->generate())), 2);
         curve_station->setLegendAttribute( QwtPlotCurve::LegendShowLine );
-        curve_station->attach(graph_entite_hydro);
+        curve_station->attach( graph_entite_hydro );
     }
 
     /* Légende */
@@ -167,6 +179,6 @@ void FenetrePrincipale::Selection_bassin_versant(QAbstractButton * rb)
     graph_entite_hydro->insertLegend(legend, QwtPlot::RightLegend);
 
     /* Insertion du graphique */
-    ui->tabWidget_graphique->addTab(graph_entite_hydro, stations_par_cours_d_eau[0]->Entite_hydrologique().second);
+    ui->tabWidget_graphique->addTab(graph_entite_hydro, cours_d_eau);
     graph_entite_hydro->replot();
 }
