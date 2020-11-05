@@ -118,7 +118,9 @@ void FenetrePrincipale::Affichage_radioButton_bassin(void)
     ============================================================================================ */
 void FenetrePrincipale::Selection_bassin_versant(QAbstractButton * rb)
 {
+    /* Nettoyage préalable des 2 tabWidgets */
     ui->tabWidget_graphique->clear();
+    ui->tabWidget_tableau->clear();
 
     /* Sélection des cours d'eau appartenant au même bassin versant */
     QMap<int, QString>cours_d_eau;
@@ -137,6 +139,7 @@ void FenetrePrincipale::Selection_bassin_versant(QAbstractButton * rb)
 
         /* Affichage */
         Affichage_graphique(rb->text(), it.value(), stations_par_cours_d_eau);
+        Affichage_tableau(it.value(), stations_par_cours_d_eau);
     }
 }
 
@@ -181,4 +184,37 @@ void FenetrePrincipale::Affichage_graphique(QString const& bassin_versant, QStri
     /* Insertion du graphique */
     ui->tabWidget_graphique->addTab(graph_entite_hydro, cours_d_eau);
     graph_entite_hydro->replot();
+}
+
+void FenetrePrincipale::Affichage_tableau(QString const& cours_d_eau, QList<StationHydro *> const& stations_par_cours_d_eau)
+{
+    QStringList titre_ligne;
+    titre_ligne << "Hauteur actuelle" << "Projection +4 heures" << "Prochain seuil historique" << "Niveau de crue actuel" << "Niveau de crue à venir" << "Choix du niveau" << "Enjeux et cartes";
+    QStringList titre_colonne;
+
+    QTableWidget *tableau = new QTableWidget(titre_ligne.count(), stations_par_cours_d_eau.size());
+
+    for (int i(0); i < stations_par_cours_d_eau.size(); ++i){
+
+        titre_colonne.push_back( stations_par_cours_d_eau[i]->Identifiant().second );
+
+        if (!stations_par_cours_d_eau.at(i)->Hauteurs_horaires().empty())
+            for (int j(0); j < titre_ligne.size(); ++j){
+
+                QTableWidgetItem *cellule = new QTableWidgetItem();
+                QString textCellule("NA");
+
+                cellule->setText(textCellule);
+                cellule->setTextAlignment(Qt::AlignCenter);
+                tableau->setItem(j, i, cellule);
+            }
+    }
+
+    tableau->setVerticalHeaderLabels(titre_ligne);
+    tableau->setHorizontalHeaderLabels(titre_colonne);
+    tableau->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    tableau->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    tableau->resizeColumnsToContents();
+
+    ui->tabWidget_tableau->addTab(tableau, cours_d_eau);
 }

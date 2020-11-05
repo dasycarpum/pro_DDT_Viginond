@@ -5,6 +5,9 @@
 #include <QButtonGroup>
 #include <QRadioButton>
 #include <QRandomGenerator>
+#include <QTableWidget>
+#include <QHeaderView>
+#include <QComboBox>
 
 #include "reseau.h"
 #include "fichier.h"
@@ -29,6 +32,7 @@ public:
 
     void Affichage_radioButton_bassin(void);
     void Affichage_graphique(QString const&, QString const&, QList<StationHydro *> const&);
+    void Affichage_tableau(QString const&, QList<StationHydro *> const&);
 
 public slots:
     void Telechargement_Vigicrues(void);
