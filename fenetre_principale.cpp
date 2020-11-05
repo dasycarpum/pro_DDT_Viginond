@@ -215,11 +215,15 @@ void FenetrePrincipale::Affichage_tableau(QString const& cours_d_eau, QList<Stat
                     break;
                     }
                 case 2:{ // prochain seuil historique (rappel de la hauteur atteinte et de la date)
-                    textCellule = stations_par_cours_d_eau.at(i)->Seuil_historique().first == 0.0 ? "" :
-                                                                                                    QString::number(stations_par_cours_d_eau.at(i)->Seuil_historique().first / 1000) + " m le " + stations_par_cours_d_eau.at(i)->Seuil_historique().second.toString("d/M/yyyy") ;
+                    textCellule = stations_par_cours_d_eau.at(i)->Seuil_historique().first == 0.0 ?
+                                "" : QString::number(stations_par_cours_d_eau.at(i)->Seuil_historique().first / 1000) + " m le " + stations_par_cours_d_eau.at(i)->Seuil_historique().second.toString("d/M/yyyy") ;
                     break;
                     }
-
+                case 3:{ // valeur du niveau de crue modélisé pour la hauteur actuelle
+                    textCellule = stations_par_cours_d_eau.at(i)->Niveau_crue_actuel() == -1.0 ?
+                                "Non déterminé" : stations_par_cours_d_eau.at(i)->Niveau_crue_actuel() == 0.0 ? "Pas de crue" : QString::number(stations_par_cours_d_eau.at(i)->Niveau_crue_actuel() / 1000) + " m";
+                    break;
+                    }
                 default:
                     break;
                 }

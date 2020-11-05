@@ -21,7 +21,7 @@ class StationHydro
     QString bv_couleur;                             // couleur attribuée au bassin versant
     int amont_aval;                                 // sur 1 masse d'eau, position de l'amont vers l'aval (1 = station la + en amont)
     QString nature;                                 // "Prévision", "Observation", "Vigilance"
-    QList<int> niveaux_crue;                        // en mm
+    QList<double> niveaux_crue;                     // liste des cotes présentant un risque d'inondation (en mm)
     double QRef;                                    // cote de référence de la crue centennale
     QMap<QDateTime, double> hauteurs_horaires;      // série temporelle des hauteurs d'eau, téléchargée sur Vigicrues par l'utilisateur
     QMap<double, QPair<QDate, QString>> historique_crue; // Hauteurs d'eau associées aux principales crues connues et leurs niveaux de vigilance
@@ -40,7 +40,7 @@ public:
     QString Bv_couleur(void) const {return bv_couleur;}
     int Amont_aval(void) const {return amont_aval ;}
     QString Nature(void) const {return nature;}
-    QList<int> Niveaux_crue(void) const {return niveaux_crue;}
+    QList<double> Niveaux_crue(void) const {return niveaux_crue;}
     double QREF(void) const {return QRef;}
     QMap<QDateTime, double> Hauteurs_horaires(void) const {return hauteurs_horaires;}
     QMap<double, QPair<QDate, QString>> Historique_crue(void) const {return historique_crue;}
@@ -54,6 +54,8 @@ public:
     QPair<double, QDateTime> Projection_niveau_4h(void) const;
     void Historique_crue_donnees(void);
     QPair<double, QDate> Seuil_historique(void) const;
+    double Niveau_crue_actuel(void) const;
+
 };
 
 #endif // STATIONHYDRO_H

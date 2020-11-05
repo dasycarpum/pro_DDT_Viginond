@@ -44,7 +44,7 @@ QList<StationHydro *> StationHydro::Liste_stations_hydro(void)
 
         QStringList nc = fichier->matrix[i][13].split('_');
         foreach (QString n, nc)
-            sh->niveaux_crue.append(n.toInt());
+            sh->niveaux_crue.append(n.toDouble());
 
         sh->QRef = fichier->matrix[i][14].toDouble();
 
@@ -134,3 +134,18 @@ QPair<double, QDate> StationHydro::Seuil_historique(void) const
     return seuil;
 }
 
+/** Renvoie le niveau de crue modélisé pour la hauteur actuelle
+    =========================================================== */
+double StationHydro::Niveau_crue_actuel(void) const
+{
+    if (niveaux_crue.first() == 0.0)
+        return -1.0;    // niveau non déterminé
+    else if ( hauteurs_horaires.last() < niveaux_crue.first())
+        return 0.0;     // pas de crue
+
+    for (int i(0); i < niveaux_crue.size(); ++i)
+        if (hauteurs_horaires.last() >= niveaux_crue[i])
+            return niveaux_crue[i];
+
+    return -1.0;
+}
