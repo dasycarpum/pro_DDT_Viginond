@@ -204,6 +204,16 @@ void FenetrePrincipale::Affichage_tableau(QString const& cours_d_eau, QList<Stat
                 QTableWidgetItem *cellule = new QTableWidgetItem();
                 QString textCellule("NA");
 
+                switch (j){
+                case 0:{ // dernier relevé horaire et hauteur actuelle
+                    textCellule = QString::number(stations_par_cours_d_eau.at(i)->Hauteurs_horaires().last() / 1000) + " m à " + stations_par_cours_d_eau.at(i)->Hauteurs_horaires().lastKey().toString("hh:mm");
+                    break;
+                    }
+
+                default:
+                    break;
+                }
+
                 cellule->setText(textCellule);
                 cellule->setTextAlignment(Qt::AlignCenter);
                 tableau->setItem(j, i, cellule);
