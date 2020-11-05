@@ -209,6 +209,11 @@ void FenetrePrincipale::Affichage_tableau(QString const& cours_d_eau, QList<Stat
                     textCellule = QString::number(stations_par_cours_d_eau.at(i)->Hauteurs_horaires().last() / 1000) + " m à " + stations_par_cours_d_eau.at(i)->Hauteurs_horaires().lastKey().toString("hh:mm");
                     break;
                     }
+                case 1:{ //projection hauteur d'eau à +4h
+                    QPair<double, QDateTime> projection = stations_par_cours_d_eau.at(i)->Projection_niveau_4h();
+                    textCellule = QString::number(projection.first / 1000, 'f', 2) + " m à " + projection.second.toString("hh:mm");
+                    break;
+                    }
 
                 default:
                     break;

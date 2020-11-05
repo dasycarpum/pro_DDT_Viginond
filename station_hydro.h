@@ -8,6 +8,7 @@
 #include <QDateTime>
 
 #include "fichier.h"
+#include "regression_polynomiale.h"
 
 class StationHydro
 {
@@ -48,6 +49,7 @@ public:
     /* Méthodes */
     static QList<StationHydro *> Liste_stations_hydro(void);
     QVector<QPointF> Hauteurs_horaires_courbe(void);
+    QPair<double, QDateTime> Projection_niveau_4h(void) const;
 };
 
 #endif // STATIONHYDRO_H

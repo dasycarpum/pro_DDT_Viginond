@@ -67,3 +67,37 @@ QVector<QPointF> StationHydro::Hauteurs_horaires_courbe(void)
 
     return xy;
 }
+
+/** Renvoie la hauteur d'eau estimée 4 heures après le dernier relevé
+    ================================================================= */
+QPair<double, QDateTime> StationHydro::Projection_niveau_4h(void) const
+{
+    /* Relevés sur les dernières 48h */
+    std::vector<double> x; // QDateTime en msec
+    std::vector<double> y; // hauteur d'eau en mm
+
+    QDateTime releve_moins_1j = hauteurs_horaires.lastKey().addDays(-2);
+    for(QMap<QDateTime, double>::const_iterator it = hauteurs_horaires.cbegin(); it != hauteurs_horaires.cend(); ++it)
+        if (it.key() > releve_moins_1j){
+            x.push_back(it.key().toTime_t());
+            y.push_back(it.value());
+        }
+
+    /* Degrés de liberté */
+    const int order(3);
+
+    /* Régression polynomiale et calcul des coefficients de l'équation en retour :
+     * y = a0 + a1 * x + a2 * x^2 + ... + an * x^n - voir outil.h */
+    std::vector<double>coeffs = polyFit(x, y, order);
+
+    /* Application des coefficients à l'équation pour projeter une hauteur d'eau 4 heures après le dernier relevé */
+    double temps_plus_4h(hauteurs_horaires.lastKey().addSecs(3600 * 4).toTime_t());
+    double projection_hauteur(0.0);
+    for (uint i(0); i < coeffs.size(); ++i)
+        projection_hauteur += coeffs.at(i) * pow(temps_plus_4h, i);
+
+    /* Retour */
+    QPair<double, QDateTime> projection(projection_hauteur, hauteurs_horaires.lastKey().addSecs(3600 * 4));
+
+    return projection;
+}

@@ -29,6 +29,7 @@ HEADERS += \
     fenetre_principale.h \
     fichier.h \
     graphique.h \
+    regression_polynomiale.h \
     reseau.h \
     station_hydro.h
 
