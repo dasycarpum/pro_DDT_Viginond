@@ -48,6 +48,9 @@ QList<StationHydro *> StationHydro::Liste_stations_hydro(void)
 
         sh->QRef = fichier->matrix[i][14].toDouble();
 
+        if (sh->Nature() == "Prévision" || sh->Nature() == "Vigilance")
+            sh->Historique_crue_donnees();
+
         stations_hydro.append(sh);
     }
 
@@ -101,3 +104,33 @@ QPair<double, QDateTime> StationHydro::Projection_niveau_4h(void) const
 
     return projection;
 }
+
+/** Date, hauteur et vigilance des crues historiques de la station hydrométrique (source RIC)
+    ========================================================================================= */
+void StationHydro::Historique_crue_donnees(void)
+{
+    /* Ouverture et lecture du fichier contenant la liste des historiques de crues à la station hydrométrique */
+    FichierCsv *fichier = new FichierCsv("/databank/hydrometeorologie/historique_crue/" + identifiant.first);
+    fichier->Lire();
+
+    /* Lecture des valeurs du tableau */
+    for (int i(1); i < fichier->matrix.size(); ++i)
+            historique_crue[fichier->matrix[i][1].toDouble()] = qMakePair( QDate::fromString(fichier->matrix[i][0], "dd/MM/yyyy"),fichier->matrix[i][2]);
+}
+
+/** Renvoie le prochain seuil historique, immédiatement supérieur à la hauteur horaire actuelle
+    ============================================================================================ */
+QPair<double, QDate> StationHydro::Seuil_historique(void) const
+{
+    QPair<double, QDate> seuil(0.0, QDate(1900, 01, 01));
+
+    for (QMap<double, QPair<QDate, QString>>::const_iterator it = historique_crue.cbegin(); it != historique_crue.cend(); ++it)
+        if (it.key() > hauteurs_horaires.last()){
+            seuil.first = it.key();
+            seuil.second = it.value().first;
+            return seuil;
+        }
+
+    return seuil;
+}
+

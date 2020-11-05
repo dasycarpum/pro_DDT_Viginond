@@ -214,6 +214,11 @@ void FenetrePrincipale::Affichage_tableau(QString const& cours_d_eau, QList<Stat
                     textCellule = QString::number(projection.first / 1000, 'f', 2) + " m à " + projection.second.toString("hh:mm");
                     break;
                     }
+                case 2:{ // prochain seuil historique (rappel de la hauteur atteinte et de la date)
+                    textCellule = stations_par_cours_d_eau.at(i)->Seuil_historique().first == 0.0 ? "" :
+                                                                                                    QString::number(stations_par_cours_d_eau.at(i)->Seuil_historique().first / 1000) + " m le " + stations_par_cours_d_eau.at(i)->Seuil_historique().second.toString("d/M/yyyy") ;
+                    break;
+                    }
 
                 default:
                     break;
