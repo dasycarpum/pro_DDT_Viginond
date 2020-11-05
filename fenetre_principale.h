@@ -1,6 +1,8 @@
 #ifndef FENETREPRINCIPALE_H
 #define FENETREPRINCIPALE_H
 
+#pragma GCC diagnostic ignored "-Wfloat-equal" // évite le "warning: comparing floating point with == or != is unsafe"
+                                               // à l'instruction "stations_par_cours_d_eau.at(i)->Niveau_crue_actuel() == -1.0 ?"
 #include <QMainWindow>
 #include <QButtonGroup>
 #include <QRadioButton>
@@ -25,6 +27,7 @@ class FenetrePrincipale : public QMainWindow
 
     QList<StationHydro *> stations_hydro;
     QButtonGroup *grp_radioButton_bassin;
+    QButtonGroup *grp_pushButton_station;
 
 public:
     FenetrePrincipale(QWidget *parent = nullptr);

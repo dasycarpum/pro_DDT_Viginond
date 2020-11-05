@@ -24,6 +24,11 @@ FenetrePrincipale::FenetrePrincipale(QWidget *parent)
     /* Connexion des radioButton 'bassin versant' pour la visualisation des données */
     grp_radioButton_bassin = new QButtonGroup(ui->groupBox_bassin_versant);
     connect(grp_radioButton_bassin, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(Selection_bassin_versant(QAbstractButton *)));
+
+    /* Ouverture des fenêtres 'Enjeux' et 'Cartographie' sur base de la station et du niveau de crue choisis par l'utilisateur  */
+    grp_pushButton_station = new QButtonGroup();
+    //connect(grp_pushButton_station, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(Fenetres_enjeux_cartographie(QAbstractButton *)));
+
 }
 
 FenetrePrincipale::~FenetrePrincipale()
@@ -203,6 +208,54 @@ void FenetrePrincipale::Affichage_tableau(QString const& cours_d_eau, QList<Stat
 
                 QTableWidgetItem *cellule = new QTableWidgetItem();
                 QString textCellule("NA");
+
+                switch (j){
+                case 0:{ // dernier relevé horaire et hauteur actuelle
+                    textCellule = QString::number(stations_par_cours_d_eau.at(i)->Hauteurs_horaires().last() / 1000) + " m à " + stations_par_cours_d_eau.at(i)->Hauteurs_horaires().lastKey().toString("hh:mm");
+                    break;
+                    }
+                case 1:{ //projection hauteur d'eau à +4h
+                    QPair<double, QDateTime> projection = stations_par_cours_d_eau.at(i)->Projection_niveau_4h();
+                    textCellule = QString::number(projection.first / 1000, 'f', 2) + " m à " + projection.second.toString("hh:mm");
+                    break;
+                    }
+                case 2:{ // prochain seuil historique (rappel de la hauteur atteinte et de la date)
+                    textCellule = stations_par_cours_d_eau.at(i)->Seuil_historique().first == 0.0 ?
+                                "" : QString::number(stations_par_cours_d_eau.at(i)->Seuil_historique().first / 1000) + " m le " + stations_par_cours_d_eau.at(i)->Seuil_historique().second.toString("d/M/yyyy") ;
+                    break;
+                    }
+                case 3:{ // valeur du niveau de crue modélisé pour la hauteur actuelle
+                    textCellule = stations_par_cours_d_eau.at(i)->Niveau_crue_actuel() == -1.0 ?
+                                    "Non déterminé" : stations_par_cours_d_eau.at(i)->Niveau_crue_actuel() == 0.0 ?
+                                        "Pas de crue" : QString::number(stations_par_cours_d_eau.at(i)->Niveau_crue_actuel() / 1000) + " m";
+                    break;
+                    }
+                case 4:{ // valeur du 1er (ou suivant) niveau de crue modélisé
+                    textCellule = stations_par_cours_d_eau.at(i)->Niveau_crue_a_venir() == -1.0 ?
+                                    "Non déterminé" : QString::number(stations_par_cours_d_eau.at(i)->Niveau_crue_a_venir() / 1000) + " m";
+                    break;
+                    }
+                case 5:{ // liste des niveaux de crue affichée dans un menu déroulant
+                    QComboBox *comboBox = new QComboBox();
+                    comboBox->setLayoutDirection(Qt::RightToLeft);
+                    comboBox->addItems(stations_par_cours_d_eau.at(i)->Liste_niveaux_crue());
+                    comboBox->setWhatsThis(QString::number(i));
+                    comboBox->setMaximumHeight(20);
+                    tableau->setCellWidget(j, i, comboBox);
+                    break;
+                    }
+                case 6:{ // pushButton pour que l'utilisateur puisse ouvrir les fenêtres 'Enjeux' et 'Cartographie' de la station, sur base du niveau de crue
+                    QPushButton *pushButton = new QPushButton("OK");
+                    pushButton->setMaximumHeight(18);
+                    pushButton->setToolTip(stations_par_cours_d_eau.at(i)->Identifiant().first); // code de la station hydro
+                    pushButton->setWhatsThis(QString::number(i)); // colonne du tableWidget
+                    grp_pushButton_station->addButton(pushButton);
+                    tableau->setCellWidget(j, i, pushButton);
+                    break;
+                    }
+                default:
+                    break;
+                }
 
                 cellule->setText(textCellule);
                 cellule->setTextAlignment(Qt::AlignCenter);
