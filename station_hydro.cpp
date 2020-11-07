@@ -165,3 +165,20 @@ double StationHydro::Niveau_crue_a_venir(void) const
 
     return -1.0;
 }
+
+/** Renvoie la couleur de la vigilance en fonction de la hauteur d'eau (en mm) passée en argument
+    ============================================================================================== */
+QString StationHydro::Vigilance(double const& hauteur) const
+{
+    QString couleur("Vert");
+
+    if (nature.compare("Observation", Qt::CaseInsensitive) == 0)
+        couleur = "Gris";
+    else if (!historique_crue.isEmpty()){
+        QMap<double, QPair<QDate, QString>>::const_iterator it = historique_crue.lowerBound(hauteur);
+        if (hauteur >= historique_crue.firstKey())
+            couleur = it.value().second;
+    }
+
+    return couleur;
+}

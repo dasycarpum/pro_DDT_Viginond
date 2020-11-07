@@ -57,6 +57,7 @@ public:
     double Niveau_crue_actuel(void) const;
     double Niveau_crue_a_venir(void) const;
     QStringList Liste_niveaux_crue(void) const {QStringList nc; for(double n : niveaux_crue) nc.append(QString::number(n/1000) + " m"); return nc;}
+    QString Vigilance(double const&) const;
 
 
 };

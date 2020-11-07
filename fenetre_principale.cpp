@@ -191,6 +191,28 @@ void FenetrePrincipale::Affichage_graphique(QString const& bassin_versant, QStri
     graph_entite_hydro->replot();
 }
 
+/* Colorisation des cellules du tableau des résultats selon la hauteur d'eau observée et la couleur de vigilance associée
+   ---------------------------------------------------------------------------------------------------------------------- */
+QColor Couleur(QString couleur)
+{
+    QColor color(QColor(255,255,255));
+
+    if (couleur.compare("Vert", Qt::CaseInsensitive) == 0)
+        color.setRgb(186,255,117);
+    else if (couleur.compare("Jaune", Qt::CaseInsensitive) == 0)
+        color.setRgb(255,255,117);
+    else if (couleur.compare("Orange", Qt::CaseInsensitive) == 0)
+        color.setRgb(255,186,117);
+    else if (couleur.compare("Rouge", Qt::CaseInsensitive) == 0)
+        color.setRgb(255,117,117);
+    else if (couleur.compare("Gris", Qt::CaseInsensitive) == 0)
+        color.setRgb(230,230,230);
+
+    return color;
+}
+
+/** Tableau présentant les indicateurs de crue par station (1 onglet = 1 cours d'eau)
+    ================================================================================= */
 void FenetrePrincipale::Affichage_tableau(QString const& cours_d_eau, QList<StationHydro *> const& stations_par_cours_d_eau)
 {
     QStringList titre_ligne;
@@ -208,34 +230,40 @@ void FenetrePrincipale::Affichage_tableau(QString const& cours_d_eau, QList<Stat
 
                 QTableWidgetItem *cellule = new QTableWidgetItem();
                 QString textCellule("NA");
+                QString colorCellule("NA");
 
                 switch (j){
                 case 0:{ // dernier relevé horaire et hauteur actuelle
                     textCellule = QString::number(stations_par_cours_d_eau.at(i)->Hauteurs_horaires().last() / 1000) + " m à " + stations_par_cours_d_eau.at(i)->Hauteurs_horaires().lastKey().toString("hh:mm");
+                    colorCellule = stations_par_cours_d_eau.at(i)->Vigilance(stations_par_cours_d_eau.at(i)->Hauteurs_horaires().last());
                     break;
                     }
                 case 1:{ //projection hauteur d'eau à +4h
                     QPair<double, QDateTime> projection = stations_par_cours_d_eau.at(i)->Projection_niveau_4h();
                     textCellule = QString::number(projection.first / 1000, 'f', 2) + " m à " + projection.second.toString("hh:mm");
+                    colorCellule = stations_par_cours_d_eau.at(i)->Vigilance(projection.first);
                     break;
                     }
                 case 2:{ // prochain seuil historique (rappel de la hauteur atteinte et de la date)
                     textCellule = stations_par_cours_d_eau.at(i)->Seuil_historique().first == 0.0 ?
                                 "" : QString::number(stations_par_cours_d_eau.at(i)->Seuil_historique().first / 1000) + " m le " + stations_par_cours_d_eau.at(i)->Seuil_historique().second.toString("d/M/yyyy") ;
+                    colorCellule = stations_par_cours_d_eau.at(i)->Vigilance(stations_par_cours_d_eau.at(i)->Seuil_historique().first);
                     break;
                     }
                 case 3:{ // valeur du niveau de crue modélisé pour la hauteur actuelle
                     textCellule = stations_par_cours_d_eau.at(i)->Niveau_crue_actuel() == -1.0 ?
                                     "Non déterminé" : stations_par_cours_d_eau.at(i)->Niveau_crue_actuel() == 0.0 ?
                                         "Pas de crue" : QString::number(stations_par_cours_d_eau.at(i)->Niveau_crue_actuel() / 1000) + " m";
+                    colorCellule = stations_par_cours_d_eau.at(i)->Vigilance(stations_par_cours_d_eau.at(i)->Niveau_crue_actuel());
                     break;
                     }
                 case 4:{ // valeur du 1er (ou suivant) niveau de crue modélisé
                     textCellule = stations_par_cours_d_eau.at(i)->Niveau_crue_a_venir() == -1.0 ?
                                     "Non déterminé" : QString::number(stations_par_cours_d_eau.at(i)->Niveau_crue_a_venir() / 1000) + " m";
+                    colorCellule = stations_par_cours_d_eau.at(i)->Vigilance(stations_par_cours_d_eau.at(i)->Niveau_crue_a_venir());
                     break;
                     }
-                case 5:{ // liste des niveaux de crue affichée dans un menu déroulant
+                case 5:{ // liste des niveaux de crue, affichée dans un menu déroulant
                     QComboBox *comboBox = new QComboBox();
                     comboBox->setLayoutDirection(Qt::RightToLeft);
                     comboBox->addItems(stations_par_cours_d_eau.at(i)->Liste_niveaux_crue());
@@ -257,9 +285,13 @@ void FenetrePrincipale::Affichage_tableau(QString const& cours_d_eau, QList<Stat
                     break;
                 }
 
-                cellule->setText(textCellule);
-                cellule->setTextAlignment(Qt::AlignCenter);
-                tableau->setItem(j, i, cellule);
+                if (j < 5){
+                    cellule->setText(textCellule);
+                    cellule->setBackgroundColor(Couleur(colorCellule));
+                    cellule->setTextAlignment(Qt::AlignCenter);
+                    tableau->setItem(j, i, cellule);
+                }
+
             }
     }
 
