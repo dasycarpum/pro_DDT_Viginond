@@ -105,6 +105,7 @@ void FenetrePrincipale::Affichage_radioButton_bassin(void)
         if (i == 0 || stations_hydro[i]->Bassin_versant() != stations_hydro[i-1]->Bassin_versant()){
             QRadioButton *radioButton = new QRadioButton(stations_hydro[i]->Bassin_versant());
             radioButton->setIcon(QIcon(QCoreApplication::applicationDirPath() + "/databank/pictogramme/" + radioButton->text() + ".png"));
+            radioButton->setCursor(Qt::PointingHandCursor);
 
             grp_radioButton_bassin->addButton(radioButton);
 
@@ -146,6 +147,10 @@ void FenetrePrincipale::Selection_bassin_versant(QAbstractButton * rb)
         Affichage_graphique(rb->text(), it.value(), stations_par_cours_d_eau);
         Affichage_tableau(it.value(), stations_par_cours_d_eau);
     }
+
+    /* Synchronisation du tableau et graphique visualisant les données d'un cours d'eau */
+    connect(ui->tabWidget_graphique, SIGNAL(currentChanged(int)), ui->tabWidget_tableau, SLOT(setCurrentIndex(int)));
+    connect(ui->tabWidget_tableau, SIGNAL(currentChanged(int)), ui->tabWidget_graphique, SLOT(setCurrentIndex(int)));
 }
 
 void FenetrePrincipale::Affichage_graphique(QString const& bassin_versant, QString const& cours_d_eau, QList<StationHydro *> const& stations_par_cours_d_eau)
@@ -216,7 +221,7 @@ QColor Couleur(QString couleur)
 void FenetrePrincipale::Affichage_tableau(QString const& cours_d_eau, QList<StationHydro *> const& stations_par_cours_d_eau)
 {
     QStringList titre_ligne;
-    titre_ligne << "Hauteur actuelle" << "Projection +4 heures" << "Prochain seuil historique" << "Niveau de crue actuel" << "Niveau de crue à venir" << "Choix du niveau" << "Enjeux et cartes";
+    titre_ligne << "Hauteur actuelle" << "Projection +4 heures" << "Prochain seuil historique" << "Niveau de crue actuel" << "Niveau de crue à venir" << "Choix du niveau" << "Enjeux et Cartographie";
     QStringList titre_colonne;
 
     QTableWidget *tableau = new QTableWidget(titre_ligne.count(), stations_par_cours_d_eau.size());
@@ -267,6 +272,7 @@ void FenetrePrincipale::Affichage_tableau(QString const& cours_d_eau, QList<Stat
                     QComboBox *comboBox = new QComboBox();
                     comboBox->setLayoutDirection(Qt::RightToLeft);
                     comboBox->addItems(stations_par_cours_d_eau.at(i)->Liste_niveaux_crue());
+                    comboBox->setCursor(Qt::PointingHandCursor);
                     comboBox->setWhatsThis(QString::number(i));
                     comboBox->setMaximumHeight(20);
                     tableau->setCellWidget(j, i, comboBox);
@@ -277,6 +283,7 @@ void FenetrePrincipale::Affichage_tableau(QString const& cours_d_eau, QList<Stat
                     pushButton->setMaximumHeight(18);
                     pushButton->setToolTip(stations_par_cours_d_eau.at(i)->Identifiant().first); // code de la station hydro
                     pushButton->setWhatsThis(QString::number(i)); // colonne du tableWidget
+                    pushButton->setCursor(Qt::PointingHandCursor);
                     grp_pushButton_station->addButton(pushButton);
                     tableau->setCellWidget(j, i, pushButton);
                     break;
