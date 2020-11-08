@@ -27,7 +27,7 @@ FenetrePrincipale::FenetrePrincipale(QWidget *parent)
 
     /* Ouverture des fenêtres 'Enjeux' et 'Cartographie' sur base de la station et du niveau de crue choisis par l'utilisateur  */
     grp_pushButton_station = new QButtonGroup();
-    //connect(grp_pushButton_station, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(Fenetres_enjeux_cartographie(QAbstractButton *)));
+    connect(grp_pushButton_station, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(Affichage_fenetres_annexes(QAbstractButton *)));
 
 }
 
@@ -309,4 +309,26 @@ void FenetrePrincipale::Affichage_tableau(QString const& cours_d_eau, QList<Stat
     tableau->resizeColumnsToContents();
 
     ui->tabWidget_tableau->addTab(tableau, cours_d_eau);
+}
+
+/** Instanciation de la fenêtre d'analyse cartographique, pour le secteur de la station retenue par l'utilisateur
+    ============================================================================================================= */
+void FenetrePrincipale::Affichage_fenetres_annexes(QAbstractButton * button)
+{
+    /* Station hydrométrique retenue par l'utilisateur par le biais du tableau d'indicateurs */
+    StationHydro * station_choisie = new StationHydro();
+
+    for (int i(0); i < stations_hydro.size(); ++i){
+        if (stations_hydro[i]->Identifiant().first == button->toolTip())
+            station_choisie = stations_hydro[i];
+    }
+
+    /* Hauteur de crue retenue par l'utilisateur dans la QComboBox du tableau (ligne 5) */
+    QTableWidget *tableau = qobject_cast<QTableWidget *>(ui->tabWidget_tableau->currentWidget());
+    QComboBox *comboBox = qobject_cast<QComboBox *>(tableau->cellWidget(5, button->whatsThis().toInt()));
+    const double hauteur_crue(comboBox->currentText().split(' ').first().toDouble() * 1000);
+
+    /* Instanciation de la boîte de dialogue Cartographie */
+    DialogCarto *dialog_carto = new DialogCarto(station_choisie, hauteur_crue);
+    dialog_carto->show();
 }

@@ -18,6 +18,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    dialog_cartographie.cpp \
     fichier.cpp \
     graphique.cpp \
     main.cpp \
@@ -26,6 +27,7 @@ SOURCES += \
     station_hydro.cpp
 
 HEADERS += \
+    dialog_cartographie.h \
     fenetre_principale.h \
     fichier.h \
     graphique.h \
@@ -34,6 +36,7 @@ HEADERS += \
     station_hydro.h
 
 FORMS += \
+    dialog_cartographie.ui \
     fenetre_principale.ui
 
 # Default rules for deployment.

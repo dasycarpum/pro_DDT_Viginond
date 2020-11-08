@@ -15,6 +15,7 @@
 #include "fichier.h"
 #include "station_hydro.h"
 #include "graphique.h"
+#include "dialog_cartographie.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class FenetrePrincipale; }
@@ -25,9 +26,9 @@ class FenetrePrincipale : public QMainWindow
     Q_OBJECT
     Ui::FenetrePrincipale *ui;
 
-    QList<StationHydro *> stations_hydro;
-    QButtonGroup *grp_radioButton_bassin;
-    QButtonGroup *grp_pushButton_station;
+    QList<StationHydro *> stations_hydro;   // liste de toutes les stations hydrométriques
+    QButtonGroup *grp_radioButton_bassin;   // tous les bassins versants (sous forme de QRadioButton) - dans 1 QGroupBox
+    QButtonGroup *grp_pushButton_station;   // toutes les stations d'un cours d'eau (sous forme de QPushButton) - dans 1 QTabWidget
 
 public:
     FenetrePrincipale(QWidget *parent = nullptr);
@@ -40,6 +41,7 @@ public:
 public slots:
     void Telechargement_Vigicrues(void);
     void Selection_bassin_versant(QAbstractButton *);
+    void Affichage_fenetres_annexes(QAbstractButton *);
 
 };
 #endif // FENETREPRINCIPALE_H
