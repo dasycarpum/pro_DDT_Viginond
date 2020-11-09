@@ -25,6 +25,7 @@ class StationHydro
     double QRef;                                    // cote de référence de la crue centennale
     QMap<QDateTime, double> hauteurs_horaires;      // série temporelle des hauteurs d'eau, téléchargée sur Vigicrues par l'utilisateur
     QMap<double, QPair<QDate, QString>> historique_crue; // Hauteurs d'eau associées aux principales crues connues et leurs niveaux de vigilance
+    QPair<QSet<QString>, QList<double>> emprise_communale; // Codes INSEE des communes aux alentours de la station (+- 5 km) ET coordonnées XY du rectangle
 
 public:
     StationHydro();
@@ -44,6 +45,7 @@ public:
     double QREF(void) const {return QRef;}
     QMap<QDateTime, double> Hauteurs_horaires(void) const {return hauteurs_horaires;}
     QMap<double, QPair<QDate, QString>> Historique_crue(void) const {return historique_crue;}
+    QPair<QSet<QString>, QList<double>> Emprise_communale(void) const {return emprise_communale;}
 
     /* Mutateur */
     void Hauteurs_horaires(QMap<QDateTime, double> hh) {hauteurs_horaires = hh;}
@@ -51,6 +53,7 @@ public:
     /* Méthodes */
     static QList<StationHydro *> Liste_stations_hydro(void);
     QVector<QPointF> Hauteurs_horaires_courbe(void);
+    void Evaluation_emprise(void);
     QPair<double, QDateTime> Projection_niveau_4h(void) const;
     void Historique_crue_donnees(void);
     QPair<double, QDate> Seuil_historique(void) const;
@@ -58,6 +61,7 @@ public:
     double Niveau_crue_a_venir(void) const;
     QStringList Liste_niveaux_crue(void) const {QStringList nc; for(double n : niveaux_crue) nc.append(QString::number(n/1000) + " m"); return nc;}
     QString Vigilance(double const&) const;
+
 
 
 };

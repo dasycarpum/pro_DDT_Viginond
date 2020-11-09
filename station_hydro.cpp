@@ -71,6 +71,39 @@ QVector<QPointF> StationHydro::Hauteurs_horaires_courbe(void)
     return xy;
 }
 
+/** Lit les codes INSEE des communes aux alentours de la station (+- 5 km) et calcule les coordonnées XY du rectangle d'emprise maximale
+    ==================================================================================================================================== */
+void StationHydro::Evaluation_emprise(void)
+{
+    /* Codes INSEE des communes proche de la station hydro */
+    FichierCsv *fs = new FichierCsv("/databank/cartographie/localisation/emprises_communales_par_station/" + identifiant.first);
+    fs->Lire();
+
+    for (int i(1); i < fs->matrix.size(); ++i)
+        emprise_communale.first.insert(fs->matrix[i][0]);
+
+    delete fs;
+
+    /* Coordonnées XY du rectangle d'emprise */
+    FichierCsv *fc = new FichierCsv("/databank/cartographie/localisation/communes_XY");
+    fc->Lire();
+
+    emprise_communale.second << 1032594 << 6937459 << 913391 << 6843314;
+
+    for (int i(1); i < fc->matrix.size(); ++i)
+        foreach(QString code, emprise_communale.first)
+            if (code == fc->matrix[i][0]){
+                if (fc->matrix[i][1].toDouble() < emprise_communale.second[0])
+                    emprise_communale.second[0] = fc->matrix[i][1].toDouble();
+                if (fc->matrix[i][2].toDouble() < emprise_communale.second[1])
+                    emprise_communale.second[1] = fc->matrix[i][2].toDouble();
+                if (fc->matrix[i][3].toDouble() > emprise_communale.second[2])
+                    emprise_communale.second[2] = fc->matrix[i][3].toDouble();
+                if (fc->matrix[i][4].toDouble() > emprise_communale.second[3])
+                    emprise_communale.second[3] = fc->matrix[i][4].toDouble();
+            }
+
+}
 /** Renvoie la hauteur d'eau estimée 4 heures après le dernier relevé
     ================================================================= */
 QPair<double, QDateTime> StationHydro::Projection_niveau_4h(void) const
@@ -182,3 +215,5 @@ QString StationHydro::Vigilance(double const& hauteur) const
 
     return couleur;
 }
+
+

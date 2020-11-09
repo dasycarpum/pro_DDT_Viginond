@@ -328,6 +328,9 @@ void FenetrePrincipale::Affichage_fenetres_annexes(QAbstractButton * button)
     QComboBox *comboBox = qobject_cast<QComboBox *>(tableau->cellWidget(5, button->whatsThis().toInt()));
     const double hauteur_crue(comboBox->currentText().split(' ').first().toDouble() * 1000);
 
+    /* Codes INSEE des communes aux alentours de la station (+- 5 km) ET coordonnées XY du rectangle d'emprise */
+    station_choisie->Evaluation_emprise();
+
     /* Instanciation de la boîte de dialogue Cartographie */
     DialogCarto *dialog_carto = new DialogCarto(station_choisie, hauteur_crue);
     dialog_carto->show();

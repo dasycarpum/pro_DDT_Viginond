@@ -2,6 +2,8 @@
 #define DIALOG_CARTOGRAPHIE_H
 
 #include <QDialog>
+#include <QProcess>
+#include <QDir>
 
 #include "station_hydro.h"
 
@@ -22,7 +24,8 @@ public:
     explicit DialogCarto(const StationHydro *, const double, QWidget *parent = nullptr);
     ~DialogCarto();
 
-private:
+public slots:
+    void Affichage_QGiS(void);
 
 };
 
