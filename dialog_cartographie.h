@@ -6,6 +6,7 @@
 #include <QDir>
 
 #include "station_hydro.h"
+#include "reseau.h"
 
 namespace Ui {
 class DialogCarto;
