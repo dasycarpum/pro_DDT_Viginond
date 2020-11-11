@@ -6,6 +6,9 @@ DialogCarto::DialogCarto(const StationHydro * s,  double h, QWidget *parent) :
 {
     ui->setupUi(this);
 
+    /* Test d'un accès au réseau internet et aux serveurs cartographiques */
+   Affichage_infos_WMS();
+
     /* Gestion des boutons de la boîte de dialogue */
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(Affichage_QGiS()));
     connect(ui->buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
@@ -16,7 +19,86 @@ DialogCarto::~DialogCarto()
     delete ui;
 }
 
-void Qgis_projet_custom(const StationHydro * station)
+/** Affichage des données WMS disponibles : vérification de l'accès internet aux serveurs
+ *  (dans QTextBrowser) et couches répertoriées pour chacun d'eaux (dans QTreeWidget)
+    ===================================================================================== */
+void DialogCarto::Affichage_infos_WMS(void)
+{
+    /* Collecte des informations relatives aux serveurs et couches WMS */
+    FichierCsv *fichier = new FichierCsv("/databank/cartographie/referentiel/WMS");
+    fichier->Lire();
+
+    for(int i(1); i < fichier->matrix.size(); ++i ){
+        Serveur_wms serveur(fichier->matrix[i][0], fichier->matrix[i][1]);
+        Couche_wms couche;
+        couche.denomination = fichier->matrix[i][2];
+        couche.adresse = fichier->matrix[i][3];
+        couche.format_image = fichier->matrix[i][4];
+
+        infos_Wms[serveur].push_back(couche);
+    }
+
+    /* Affichage des tests d'accès à internet et aux serveurs (QTextBrowser) */
+    Reseau *reseau = new Reseau();
+    reseau->Test_connexion(ui->textBrowser_information);    // test de connexion à internet (Google)
+
+    QMap<Serveur_wms, QList<Couche_wms>> infos_Wms_modif;
+    for (QMap<Serveur_wms, QList<Couche_wms>>::const_iterator it = infos_Wms.cbegin(); it != infos_Wms.cend(); ++it)
+        if (reseau->Test_connexion(ui->textBrowser_information, it.key().denomination, it.key().adresse.split('/').first())){
+            Serveur_wms serveur(it.key().denomination, it.key().adresse);
+            serveur.acces = true;                           // validation de l'accès internet pour ce serveur
+            infos_Wms_modif[serveur] = it.value();
+        }
+    infos_Wms.swap(infos_Wms_modif);
+    delete reseau;
+
+    /* Affichage des serveurs accessibles, avec leurs couches respectives (QTreeWidget) */
+    ui->treeWidget_fond_carto->setColumnCount(1);
+
+    QTreeWidgetItem *item_0 = nullptr;
+    QTreeWidgetItem *item_1 = nullptr;
+
+    for (QMap<Serveur_wms, QList<Couche_wms>>::const_iterator it = infos_Wms.cbegin(); it != infos_Wms.cend(); ++it){
+
+            if (it.key().acces){                                // nom des serveurs accessibles
+                item_0 = new QTreeWidgetItem();
+                item_0->setCheckState(0, Qt::Unchecked);
+                item_0->setText(0, it.key().denomination);
+            }
+            ui->treeWidget_fond_carto->addTopLevelItem(item_0);
+
+            for (int i(0); i < it.value().size(); ++i){         // nom des couches (pour chaque serveur)
+                item_1 = new QTreeWidgetItem();
+                item_1->setCheckState(0, Qt::Unchecked);
+                item_1->setText(0, it.value()[i].denomination);
+                item_0->addChild(item_1);
+            }
+    }
+    ui->treeWidget_fond_carto->expandAll();
+
+    connect(ui->treeWidget_fond_carto, SIGNAL(itemChanged(QTreeWidgetItem *, int) ), this, SLOT(Gestion_check(QTreeWidgetItem*,int)));
+}
+
+/** Validation des couches WMS retenues par l'utilisateur
+    ===================================================== */
+void DialogCarto::Choix_referentiel_WMS(void){
+
+    QTreeWidgetItemIterator it_tree(ui->treeWidget_fond_carto);
+    while (*it_tree)
+    {
+        if ((*it_tree)->checkState(0) == 2 && (*it_tree)->childCount() == 0)  // = 0 : unchecked, = 1 : partially, = 2 : checked  && thématique sans enfant (donc finale)
+            for (QMap<Serveur_wms, QList<Couche_wms>>::iterator it_map = infos_Wms.begin(); it_map != infos_Wms.end(); ++it_map)
+                for (int i(0); i < it_map.value().size(); ++i)
+                    if (it_map.value()[i].denomination == (*it_tree)->text(0))
+                       it_map.value()[i].choix_utilisateur = true;
+        ++it_tree;
+    }
+}
+
+/** Personnalisation du projet QGiS en fonction des choix utilisateurs
+ * (localisation station, référentiels WMS, hauteur de crue, ...)
+    ==================================================================*/
+void DialogCarto::Customisation_projet_QGiS(void)
 {
     QDir repertoire("C:\\temp");
     if (!repertoire.exists())
@@ -35,30 +117,44 @@ void Qgis_projet_custom(const StationHydro * station)
     texte << "from qgis.core import *" << endl;
 
     /* Message d'accueil */
-    texte << "iface.messageBar().pushMessage(\"DDT 57\", \"Bienvenue sur le projet d'analyse cartographique de crue !\")" << endl;
+    texte << "iface.messageBar().pushMessage(\"DDT 57\", \"Bienvenue sur le projet d'analyse cartographique de crue...\")" << endl;
     /* Ouverture du projet */
     texte << "qgs = QgsApplication([], False)" << endl;
     texte << "qgs.initQgis()" << endl;
     texte << "project = QgsProject.instance()" << endl;
     texte << "project.read(\"" + QCoreApplication::applicationDirPath() + "/databank/cartographie/projet_qgis.qgz\")" << endl;
     /* Vue carto localisée sur le secteur géographique de la station hydro */
-    texte << "qgis.utils.iface.mapCanvas().setExtent(QgsRectangle(" << station->Emprise_communale().second[0] << ","
-                                                                    << station->Emprise_communale().second[1] << ","
-                                                                    << station->Emprise_communale().second[2] << ","
-                                                                    << station->Emprise_communale().second[3] << "))" << endl;
+    texte << "qgis.utils.iface.mapCanvas().setExtent(QgsRectangle(" << station_hydro->Emprise_communale().second[0] << ","
+                                                                    << station_hydro->Emprise_communale().second[1] << ","
+                                                                    << station_hydro->Emprise_communale().second[2] << ","
+                                                                    << station_hydro->Emprise_communale().second[3] << "))" << endl;
     /* Projection = Lambert 93 Bornes Europe = EPSG 2154 */
     texte << "lambert93 = QgsCoordinateReferenceSystem(2154, QgsCoordinateReferenceSystem.PostgisCrsId)\n"
              "qgis.utils.iface.mapCanvas().setDestinationCrs(lambert93)" << endl;
+    /* Référentiels WMS */
+    Choix_referentiel_WMS();
+    for (QMap<Serveur_wms, QList<Couche_wms>>::const_iterator it = infos_Wms.cbegin(); it != infos_Wms.cend(); ++it)
+        for (int i(0); i < it.value().size(); ++i)
+            if (it.value()[i].choix_utilisateur){
+                texte << QString("uri = 'crs=EPSG:2154&featureCount=10&format=%1&layers=%2&styles=&url=https://%3'")
+                         .arg(it.value()[i].format_image)
+                         .arg(it.value()[i].adresse)
+                         .arg(it.key().adresse) << endl;
+                texte << QString("qgis.utils.iface.addRasterLayer(uri, '%1', 'wms')")
+                         .arg(it.value()[i].denomination).toUtf8() << endl;
+            }
     /* Finalisation */
     texte << "qgis.utils.iface.mapCanvas().refresh()";
 
     fichier.close();
 }
 
+/** Exécution de QGiS pour l'analyse cartographique de la crue
+    ========================================================== */
 void DialogCarto::Affichage_QGiS(void)
 {
     /* Customisation du projet QGiS */
-    Qgis_projet_custom(station_hydro);
+    Customisation_projet_QGiS();
 
     /* Exécution de QGiS */
     QProcess *process = new QProcess(this);
@@ -66,4 +162,36 @@ void DialogCarto::Affichage_QGiS(void)
     process->setWorkingDirectory(chemin);
     process->startDetached(chemin + "qgis-ltr.bat", QStringList());
     process->waitForFinished();
+}
+
+/** Gère les checks des cases à cocher dans le QTreeWidget (entreQTreeWidgetItem parent et enfants)
+    =============================================================================================== */
+void DialogCarto::Gestion_check(QTreeWidgetItem * item, int )
+{
+    if (item->checkState(0) == 2)
+        for (int i(0); i < item->childCount(); ++i)
+          item->child(i)->setCheckState(0, Qt::Checked);
+
+    else if (item->checkState(0) == 0)
+        for (int i(0); i < item->childCount(); ++i)
+          item->child(i)->setCheckState(0, Qt::Unchecked);
+
+    if (item->parent())
+    {
+        bool allChecked=true;
+        bool allUncheked=true;
+        for (int i=0; i < item->parent()->childCount(); i++)
+        {
+            if (item->parent()->child(i)->checkState(0) != Qt::Checked)
+                allChecked = false;
+            if (item->parent()->child(i)->checkState(0) != Qt::Unchecked)
+                allUncheked = false;
+        }
+        if (allChecked)
+            item->parent()->setCheckState(0, Qt::Checked);
+        else if(allUncheked)
+            item->parent()->setCheckState(0, Qt::Unchecked);
+        else
+            item->parent()->setCheckState(0, Qt::PartiallyChecked);
+    }
 }

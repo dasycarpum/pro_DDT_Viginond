@@ -5,6 +5,7 @@
 #include <QHostInfo>
 #include <QNetworkReply>
 #include <QEventLoop>
+#include <QTextBrowser>
 
 class Reseau : public QObject
 {
@@ -18,6 +19,7 @@ public:
     QByteArray Donnee_page_web(void) const {return donnee_page_web;}
 
     bool Test_connexion(QString const& = "google.com");
+    bool Test_connexion(QTextBrowser *, QString const& = "Google", QString const& = "google.com");
     void Enregistrer_page_web(QUrl const&);  // type XML ou HTML
 
 signals:

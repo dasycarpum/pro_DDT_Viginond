@@ -17,6 +17,26 @@ bool Reseau::Test_connexion(const QString & nom_site)
         return true;
 }
 
+bool Reseau::Test_connexion(QTextBrowser * textBrowser, const QString & nom, const QString & adresse)
+{
+    QHostInfo info =QHostInfo::fromName(adresse);
+
+    if (info.error() != QHostInfo::NoError){
+        textBrowser->append(QString("<font color=darkRed><b>Pas de connexion %1 %2 !</b></font>")
+                            .arg(nom == "Google" ? "à internet" : "au serveur")
+                            .arg(nom == "Google" ? "" : nom));
+        return false;
+    }
+    else{
+        textBrowser->append(QString("<font color=%1><b>Accès %2 %3 validé</b></font> <font color=darkGrey>(https://%4)</font>")
+                            .arg(nom == "Google" ? "darkGreen" : "darkBlue")
+                            .arg(nom == "Google" ? "internet" : "serveur")
+                            .arg(nom == "Google" ? "" : nom)
+                            .arg(adresse));
+        return true;
+    }
+}
+
 /** Enregistrement d'une page web  pour récupérer son contenu
     =========================================================*/
 void Reseau::Enregistrer_page_web(const QUrl & url)

@@ -9,10 +9,7 @@ FenetrePrincipale::FenetrePrincipale(QWidget *parent)
 
     /* Test d'un accès au réseau internet */
     Reseau *reseau = new Reseau();
-    if (reseau->Test_connexion())
-        ui->textBrowser_internet->append("<font color=darkGreen><b>Accès internet validé</b></font> <font color=darkGrey>(https://www.google.com/)</font>");
-    else
-        ui->textBrowser_internet->append("<font color=darkRed><b>Pas de connexion internet !</b></font>");
+    reseau->Test_connexion(ui->textBrowser_internet);
     delete reseau;
 
     /* Constitution de la BDD des stations hydrométriques et de leurs caractéristiques */
