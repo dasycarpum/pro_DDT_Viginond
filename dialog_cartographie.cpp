@@ -7,20 +7,7 @@ DialogCarto::DialogCarto(const StationHydro * s,  double h, QWidget *parent) :
     ui->setupUi(this);
 
     /* Test d'un accès au réseau internet et aux serveurs cartographiques */
-    Reseau *reseau = new Reseau();
-    if (reseau->Test_connexion())
-        ui->textBrowser_information->append("<font color=darkGreen><b>Accès internet validé</b></font> <font color=darkGrey>(www.google.com)</font>");
-    else
-        ui->textBrowser_information->append("<font color=darkRed><b>Pas de connexion internet !</b></font>");
-
-    QString serveur_carto("osm.geograndest.fr");
-    if (reseau->Test_connexion(serveur_carto))
-        ui->textBrowser_information->append(QString("<font color=darkGreen><b>Accès serveur validé</b></font> <font color=darkGrey>(%1)</font>")
-                                            .arg(serveur_carto));
-    else
-        ui->textBrowser_information->append("<font color=darkRed><b>Pas de connexion serveur !</b></font>");
-
-    delete reseau;
+   Affichage_infos_WMS();
 
     /* Gestion des boutons de la boîte de dialogue */
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(Affichage_QGiS()));
@@ -30,6 +17,28 @@ DialogCarto::DialogCarto(const StationHydro * s,  double h, QWidget *parent) :
 DialogCarto::~DialogCarto()
 {
     delete ui;
+}
+
+void DialogCarto::Affichage_infos_WMS(void)
+{
+    /* Collecte des informations relatives aux serveurs et couches WMS */
+    FichierCsv *fichier = new FichierCsv("/databank/cartographie/referentiel/WMS");
+    fichier->Lire();
+
+    for(int i(1); i < fichier->matrix.size(); ++i ){
+        Couche_wms couche;
+        Serveur_wms serveur(fichier->matrix[i][0], fichier->matrix[i][1]);
+        couche.denomination = fichier->matrix[i][2];
+        couche.adresse = fichier->matrix[i][3];
+        couche.format_image = fichier->matrix[i][4];
+
+        infos_Wms[serveur].push_back(couche);
+    }
+
+    qDebug() << infos_Wms.size();
+    for (QMap<Serveur_wms, QList<Couche_wms>>::const_iterator it = infos_Wms.cbegin(); it != infos_Wms.cend(); ++it){
+        qDebug() << it.key().denomination << it.value().size();
+    }
 }
 
 void Qgis_projet_custom(const StationHydro * station)
