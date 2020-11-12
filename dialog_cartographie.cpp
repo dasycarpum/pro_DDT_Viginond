@@ -230,11 +230,11 @@ void DialogCarto::Customisation_projet_QGiS(void)
         for (int i(0); i < infos_sig[k].size(); ++i)
             if (infos_sig[k][i].second){
                 texte << QString("couche%1 = iface.addVectorLayer(\"%2\", \"%3\",\"ogr\")")
-                        .arg(QString::number(i))
+                        .arg(QString::number(k) + QString::number(i))
                         .arg(infos_sig[k][i].first)
                         .arg("") << endl;
                 texte << QString("if not couche%1 : print (\"Echec au chargement de la couche %2 !\")")
-                         .arg(QString::number(i))
+                         .arg(QString::number(k) + QString::number(i))
                          .arg(infos_sig[k][i].first) << endl;
             }
     /* Finalisation */
