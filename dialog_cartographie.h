@@ -54,6 +54,8 @@ class DialogCarto : public QDialog
     const double hauteur_crue;                              // modèle de hauteur de crue choisie par l'utilisateur
 
     QMap<Serveur_wms, QList<Couche_wms>> infos_Wms;         // liste des couches WMS disponibles par serveurs
+    QList<QPair<QString, bool>> infos_sig_enjeux;           // liste des couches SIG de type vecteur (enjeux)
+    QList<QPair<QString, bool>> infos_sig_zip;              // liste des couches SIG de type vecteur (ZIP-ZICH)
 
 public:
     explicit DialogCarto(const StationHydro *, const double, QWidget *parent = nullptr);
@@ -61,6 +63,8 @@ public:
 
     void Affichage_infos_WMS(void);
     void Choix_referentiel_WMS(void);
+    void Affichage_infos_SIG(void);
+    void Choix_couche_SIG(void);
     void Customisation_projet_QGiS(void);
 
 public slots:

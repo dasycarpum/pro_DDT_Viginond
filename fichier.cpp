@@ -49,6 +49,21 @@ QStringList FichierCsv::Liste_sous_repertoires(const QString & repertoire)
     return liste;
 }
 
+/** Retourne la liste des fichiers et leurs chemins contenus dans un répertoire,
+ *  en précisant en option un sous-répertoire cible et l'extension des fichiers recherchés
+    ======================================================================================= */
+QStringList FichierCsv::Liste_fichiers(const QString & repertoire, const QString & sous_repertoire, const QString & extension)
+{
+    QStringList liste_fichiers;
+
+    QDirIterator it(QCoreApplication::applicationDirPath() + repertoire, QStringList() << "*." + extension, QDir::Files, QDirIterator::Subdirectories);
+    while (it.hasNext())
+        if(it.next().contains(sous_repertoire))
+            liste_fichiers.append(it.fileInfo().filePath());
+
+    return liste_fichiers;
+}
+
 //____________________________________________________________________________________________________________________________________________
 
 /* Conversion d'une liste séquentielle  en tableau 2D

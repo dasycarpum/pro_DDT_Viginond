@@ -6,6 +6,7 @@
 #include <QCoreApplication>
 #include <QMessageBox>
 #include <QXmlStreamReader>
+#include <QDirIterator>
 
 class FichierCsv : public QFile
 {
@@ -22,6 +23,7 @@ public:
 
     void Lire(void);
     static QStringList Liste_sous_repertoires(QString const&);
+    static QStringList Liste_fichiers(QString const&, QString const& = "", QString const& = "*");
 };
 
 /*_______________________________________________________________________________________________________*/
