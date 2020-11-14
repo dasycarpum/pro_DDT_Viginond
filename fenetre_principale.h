@@ -34,11 +34,13 @@ public:
     FenetrePrincipale(QWidget *parent = nullptr);
     ~FenetrePrincipale();
 
+    QString Selection_proxy(void);
     void Affichage_radioButton_bassin(void);
     void Affichage_graphique(QString const&, QString const&, QList<StationHydro *> const&);
     void Affichage_tableau(QString const&, QList<StationHydro *> const&);
 
 public slots:
+
     void Telechargement_Vigicrues(void);
     void Selection_bassin_versant(QAbstractButton *);
     void Affichage_fenetres_annexes(QAbstractButton *);

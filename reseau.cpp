@@ -1,10 +1,5 @@
 #include "reseau.h"
 
-Reseau::Reseau(QObject *parent) : QObject(parent)
-{
-
-}
-
 /** Test de la connexion de l'ordinateur au réseau internet
     ======================================================= */
 bool Reseau::Test_connexion(const QString & nom_site)
@@ -42,6 +37,7 @@ bool Reseau::Test_connexion(QTextBrowser * textBrowser, const QString & nom, con
 void Reseau::Enregistrer_page_web(const QUrl & url)
 {
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    manager->setProxy(*proxy);
 
     const QNetworkRequest requete(url);
 
@@ -67,4 +63,20 @@ void Reseau::Reponse_terminee(QNetworkReply * reponse)
         donnee_page_web = reponse->readAll();
     else
         qDebug() << code_etat;
+}
+
+/** Constructeur
+    ============ */
+Proxy::Proxy()
+{
+    /* Ouverture et lecture du fichier contenant la liste des proxies préenregistrés */
+    FichierCsv *fichier = new FichierCsv("/databank/reseau/proxy");
+    fichier->Lire();
+
+    for (int i(1); i < fichier->matrix.size(); ++i){
+        for (int j(1); j < fichier->matrix[i].size(); ++j)
+            proxies[fichier->matrix[i][0]].append(fichier->matrix[i][j]);
+    }
+
+    delete fichier;
 }

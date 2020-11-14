@@ -57,10 +57,20 @@ QMap<QDateTime, double> Typage_releve(QVector<QVector<QString>> hh_str)
     ==================================== */
 void FenetrePrincipale::Telechargement_Vigicrues(void)
 {
+    /* Configuration du proxy pour connexion à un réseau protégé */
+    Proxy * proxy = new Proxy();
+    QString site(Selection_proxy());
+    if (site != "Aucun"){
+        proxy->setType(QNetworkProxy::ProxyType(proxy->Proxies()[site][0].toInt()));
+        proxy->setHostName(proxy->Proxies()[site][1]);
+        proxy->setPort(quint16(proxy->Proxies()[site][2].toUInt()));
+    }
+
+    /* Boucle sur les stations hydro */
     for (int i(0); i < stations_hydro.size(); ++i){
 
         /* Téléchargement des données (historiques des hauteurs d'eau par station) sur le site Vigicrues, au format XML */
-        Reseau *reseau = new Reseau();
+        Reseau *reseau = new Reseau(proxy);
         reseau->Enregistrer_page_web(QUrl("https://www.vigicrues.gouv.fr/services/observations.xml/?CdStationHydro=" + stations_hydro[i]->Identifiant().first));
 
         /* Conversion du tableau d'octets (QByteArray) en un tableau 2D indicé 'temps-hauteur' */
@@ -90,6 +100,17 @@ void FenetrePrincipale::Telechargement_Vigicrues(void)
     }
     /* Instanciation des radioButtons des bassins versants du territoire */
     Affichage_radioButton_bassin();
+}
+
+/** Identification du site de connexion et de son proxy
+    =================================================== */
+QString FenetrePrincipale::Selection_proxy(void)
+{
+    foreach(QAbstractButton *rb, ui->buttonGroup_proxy->buttons())
+        if (rb->isChecked())
+            return rb->text();
+
+    return "NA";
 }
 
 /** Instanciation des radioButtons 'bassin versant'
