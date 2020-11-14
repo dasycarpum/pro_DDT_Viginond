@@ -41,3 +41,9 @@ target_wrapper.*
 
 # QtCreator CMake
 CMakeLists.txt.user*
+
+# Sourcetrail (ajout 13/11/2020)
+*.srctrlbm
+*.srctrldb
+*.srctrlprj
+*.json
