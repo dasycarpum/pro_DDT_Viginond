@@ -20,6 +20,6 @@ l'application, de type IHM, assiste l'utilisateur en lui fournissant de manière
     ▪ Langage : C++11
     ▪ Framework : Qt (version 5.12.6)
     ▪ IDE : Qt Creator (version 4.10.2)
-    ▪ Bibliothèque complémentaire : qwt (version 6.1.5)
+    ▪ Bibliothèque complémentaire : qwt (version 6.1.4)
     ▪ Gestionnaire de versions du code : Git (version 2.28.0)
     ▪ Plateforme applicative : Azure Devops sous https://dev.azure.com/dasycarpum-pro-DDT/Viginond%2057
