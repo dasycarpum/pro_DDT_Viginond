@@ -26,8 +26,12 @@ FenetrePrincipale::FenetrePrincipale(QWidget *parent)
     grp_pushButton_station = new QButtonGroup();
     connect(grp_pushButton_station, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(Affichage_fenetres_annexes(QAbstractButton *)));
 
+    /* Menus */
     connect(ui->action_Meuse_Moselle, SIGNAL(triggered()), this, SLOT(Menu_arretes_prefectoraux()));
     connect(ui->action_Rhin_Sarre, SIGNAL(triggered()), this, SLOT(Menu_arretes_prefectoraux()));
+    Affichage_menu_sites_web();
+    connect(ui->menu_sites_web, SIGNAL(triggered(QAction *)), this, SLOT(Menu_sites_web(QAction *)));
+
 }
 
 FenetrePrincipale::~FenetrePrincipale()
@@ -366,3 +370,24 @@ void FenetrePrincipale::Menu_arretes_prefectoraux(void)
     QDesktopServices::openUrl(urlFichier);
 }
 
+void FenetrePrincipale::Affichage_menu_sites_web(void)
+{
+    /* Ouverture et lecture du fichier contenant la liste des sites Web*/
+    FichierCsv *fichier = new FichierCsv("/databank/reseau/sites_web");
+    fichier->Lire();
+
+    /* Insertion des menus-actions 'sites Web' */
+    QList<QAction *> sites;
+    for (int i(1); i < fichier->matrix.size(); ++i){
+            QAction * action = new QAction(fichier->matrix[i][0]); // nom générique du site
+            action->setWhatsThis(fichier->matrix[i][1]);           // adresse internet du site
+            sites.append(action);
+        }
+    ui->menu_sites_web->addActions(sites);
+    delete fichier;
+}
+
+void FenetrePrincipale::Menu_sites_web(QAction * action)
+{
+    QDesktopServices::openUrl(QUrl(action->whatsThis()));
+}

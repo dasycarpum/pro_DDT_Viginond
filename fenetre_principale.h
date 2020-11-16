@@ -39,14 +39,15 @@ public:
     void Affichage_radioButton_bassin(void);
     void Affichage_graphique(QString const&, QString const&, QList<StationHydro *> const&);
     void Affichage_tableau(QString const&, QList<StationHydro *> const&);
+    void Affichage_menu_sites_web(void);
 
 public slots:
-
     void Telechargement_Vigicrues(void);
     void Selection_bassin_versant(QAbstractButton *);
     void Affichage_fenetres_annexes(QAbstractButton *);
 
     void Menu_arretes_prefectoraux(void);
+    void Menu_sites_web(QAction * action);
 
 };
 #endif // FENETREPRINCIPALE_H
