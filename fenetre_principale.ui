@@ -211,6 +211,12 @@
      <string>Sites Web</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menu_crues_historiques">
+    <property name="title">
+     <string>Crues historiques</string>
+    </property>
+   </widget>
+   <addaction name="menu_crues_historiques"/>
    <addaction name="menuArr_t_s_pr_fectoraux"/>
    <addaction name="menu_sites_web"/>
   </widget>

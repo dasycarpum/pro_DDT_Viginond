@@ -1,5 +1,6 @@
 #include "fenetre_principale.h"
 #include "ui_fenetre_principale.h"
+#include <initializer_list>
 
 FenetrePrincipale::FenetrePrincipale(QWidget *parent)
     : QMainWindow(parent)
@@ -31,6 +32,8 @@ FenetrePrincipale::FenetrePrincipale(QWidget *parent)
     connect(ui->action_Rhin_Sarre, SIGNAL(triggered()), this, SLOT(Menu_arretes_prefectoraux()));
     Affichage_menu_sites_web();
     connect(ui->menu_sites_web, SIGNAL(triggered(QAction *)), this, SLOT(Menu_sites_web(QAction *)));
+    Affichage_menu_crues_historiques();
+    connect(ui->menu_crues_historiques, SIGNAL(triggered(QAction *)), this, SLOT(Menu_crues_historiques(QAction *)));
 
 }
 
@@ -390,4 +393,55 @@ void FenetrePrincipale::Affichage_menu_sites_web(void)
 void FenetrePrincipale::Menu_sites_web(QAction * action)
 {
     QDesktopServices::openUrl(QUrl(action->whatsThis()));
+}
+
+
+void FenetrePrincipale::Affichage_menu_crues_historiques(void)
+{
+    /* Liste des cours d'eau avec historiques de crues par bassin versant */
+    QMap<QString, QSet<QString>> cours_d_eau_par_bv;
+
+    for (int i(0); i < stations_hydro.size(); ++i)
+        if (!stations_hydro[i]->Historique_crue().isEmpty())
+            cours_d_eau_par_bv[stations_hydro[i]->Bassin_versant()].insert(stations_hydro[i]->Entite_hydrologique().second);
+
+    /* Insertion des menus 'bassins versants' et de leurs actions 'cours d'eau' */
+    for (QMap<QString, QSet<QString>>::const_iterator it_m = cours_d_eau_par_bv.cbegin(); it_m != cours_d_eau_par_bv.cend(); ++it_m){
+        QList<QAction *> cours_d_eau;
+        for(QSet<QString>::const_iterator it_s = it_m.value().cbegin(); it_s != it_m.value().cend(); ++it_s){
+            QAction * action = new QAction(*it_s);  // nom du cours d'eau
+            action->setWhatsThis(it_m.key());       // nom du bassin versant
+            cours_d_eau.append(action);
+        }
+        ui->menu_crues_historiques->addMenu(it_m.key())->addActions(cours_d_eau);
+    }
+}
+
+void FenetrePrincipale::Menu_crues_historiques(QAction * action)
+{
+    QString textMessage("");
+    static QMap<QString, QString> couleur; couleur.insert("Vert","lightGreen"); couleur.insert("Jaune","yellow");
+                                           couleur.insert("Orange","orange"); couleur.insert("Rouge","red");
+
+    for (int i(0); i < stations_hydro.size(); ++i)
+        if (stations_hydro[i]->Bassin_versant() == action->whatsThis() &&
+                stations_hydro[i]->Entite_hydrologique().second == action->text() &&
+                !stations_hydro[i]->Historique_crue().isEmpty()){
+            textMessage.append(QString("Cours d'eau : <b>%1</b> - Station <b>%2</b><br><br>")
+                                            .arg(stations_hydro[i]->Entite_hydrologique().second)
+                                            .arg(stations_hydro[i]->Identifiant().second));
+            for (QMap<double, QPair<QDate, QString>>::const_iterator it = stations_hydro[i]->Historique_crue().cbegin(); it != stations_hydro[i]->Historique_crue().cend(); ++it)
+                textMessage.append(QString("<span style='background-color:%1'><b>%2</b> - Hauteur d'eau : <b>%L3 m</b></span><br>")
+                                                   .arg(couleur[it.value().second])
+                                                   .arg(it.value().first.toString("MMMM yyyy"))
+                                                   .arg(it.key() /1000, 0, 'f', 2));
+            textMessage.append("<br>");
+        }
+
+    /* Affichage du texte dans la MessagBox */
+    QMessageBox msgBox;
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.setWindowTitle(ui->menu_crues_historiques->title());
+    msgBox.setText(textMessage);
+    msgBox.exec();
 }

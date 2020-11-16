@@ -40,6 +40,7 @@ public:
     void Affichage_graphique(QString const&, QString const&, QList<StationHydro *> const&);
     void Affichage_tableau(QString const&, QList<StationHydro *> const&);
     void Affichage_menu_sites_web(void);
+    void Affichage_menu_crues_historiques(void);
 
 public slots:
     void Telechargement_Vigicrues(void);
@@ -48,6 +49,8 @@ public slots:
 
     void Menu_arretes_prefectoraux(void);
     void Menu_sites_web(QAction * action);
+    void Menu_crues_historiques(QAction * action);
+
 
 };
 #endif // FENETREPRINCIPALE_H
