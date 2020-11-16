@@ -10,6 +10,7 @@
 #include <QTableWidget>
 #include <QHeaderView>
 #include <QComboBox>
+#include <QDesktopServices>
 
 #include "reseau.h"
 #include "fichier.h"
@@ -44,6 +45,8 @@ public slots:
     void Telechargement_Vigicrues(void);
     void Selection_bassin_versant(QAbstractButton *);
     void Affichage_fenetres_annexes(QAbstractButton *);
+
+    void Menu_arretes_prefectoraux(void);
 
 };
 #endif // FENETREPRINCIPALE_H

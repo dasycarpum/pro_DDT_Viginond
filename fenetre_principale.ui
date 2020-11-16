@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1024</width>
-    <height>807</height>
+    <height>815</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -196,11 +196,29 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuArr_t_s_pr_fectoraux">
+    <property name="title">
+     <string>Arrêtés préfectoraux</string>
+    </property>
+    <addaction name="action_Meuse_Moselle"/>
+    <addaction name="action_Rhin_Sarre"/>
+   </widget>
+   <addaction name="menuArr_t_s_pr_fectoraux"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="action_Meuse_Moselle">
+   <property name="text">
+    <string>Meuse Moselle</string>
+   </property>
+  </action>
+  <action name="action_Rhin_Sarre">
+   <property name="text">
+    <string>Rhin Sarre</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

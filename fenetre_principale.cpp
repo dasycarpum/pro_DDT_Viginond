@@ -26,6 +26,8 @@ FenetrePrincipale::FenetrePrincipale(QWidget *parent)
     grp_pushButton_station = new QButtonGroup();
     connect(grp_pushButton_station, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(Affichage_fenetres_annexes(QAbstractButton *)));
 
+    connect(ui->action_Meuse_Moselle, SIGNAL(triggered()), this, SLOT(Menu_arretes_prefectoraux()));
+    connect(ui->action_Rhin_Sarre, SIGNAL(triggered()), this, SLOT(Menu_arretes_prefectoraux()));
 }
 
 FenetrePrincipale::~FenetrePrincipale()
@@ -353,3 +355,14 @@ void FenetrePrincipale::Affichage_fenetres_annexes(QAbstractButton * button)
     DialogCarto *dialog_carto = new DialogCarto(station_choisie, hauteur_crue);
     dialog_carto->show();
 }
+
+void FenetrePrincipale::Menu_arretes_prefectoraux(void)
+{
+    QAction * act = qobject_cast<QAction *>(sender());
+    QString arrete = act->text().replace(' ', '_');
+
+    QUrl url("file:///databank/hydrometeorologie/arretes_prefectoraux/" + arrete + ".pdf");
+    QUrl urlFichier = QUrl::fromLocalFile(QCoreApplication::applicationDirPath() + url.toLocalFile());
+    QDesktopServices::openUrl(urlFichier);
+}
+
