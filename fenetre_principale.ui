@@ -230,16 +230,28 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="action_Meuse_Moselle">
+   <property name="icon">
+    <iconset resource="picto.qrc">
+     <normaloff>:/release/databank/pictogramme/marianne.png</normaloff>:/release/databank/pictogramme/marianne.png</iconset>
+   </property>
    <property name="text">
     <string>Meuse Moselle</string>
    </property>
   </action>
   <action name="action_Rhin_Sarre">
+   <property name="icon">
+    <iconset resource="picto.qrc">
+     <normaloff>:/release/databank/pictogramme/marianne.png</normaloff>:/release/databank/pictogramme/marianne.png</iconset>
+   </property>
    <property name="text">
     <string>Rhin Sarre</string>
    </property>
   </action>
   <action name="action_manuel_utilisation">
+   <property name="icon">
+    <iconset resource="picto.qrc">
+     <normaloff>:/release/databank/pictogramme/manuel.png</normaloff>:/release/databank/pictogramme/manuel.png</iconset>
+   </property>
    <property name="text">
     <string>Manuel d'utilisation</string>
    </property>
@@ -248,6 +260,10 @@
    </property>
   </action>
   <action name="action_QGiS_3_4_5">
+   <property name="icon">
+    <iconset resource="picto.qrc">
+     <normaloff>:/release/databank/pictogramme/qgis.png</normaloff>:/release/databank/pictogramme/qgis.png</iconset>
+   </property>
    <property name="text">
     <string>QGiS 3.4.5</string>
    </property>
@@ -256,7 +272,9 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="picto.qrc"/>
+ </resources>
  <connections/>
  <buttongroups>
   <buttongroup name="buttonGroup_proxy"/>

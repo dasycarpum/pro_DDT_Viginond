@@ -259,7 +259,7 @@ QColor Couleur(QString couleur)
 }
 /* Mise en forme du menu déroulant dans le tableau des paramètres de crue
    ----------------------------------------------------------------------*/
-void ComboBox(QComboBox * comboBox, StationHydro * station, int i)
+void ComboBox(QComboBox * comboBox, const StationHydro * station, int i)
 {
     comboBox->setLayoutDirection(Qt::RightToLeft);
     comboBox->addItems(station->Liste_niveaux_crue());
@@ -270,7 +270,7 @@ void ComboBox(QComboBox * comboBox, StationHydro * station, int i)
 
 /* Mise en forme du bouton dans le tableau des paramètres de crue
    --------------------------------------------------------------*/
-void PushButton(QPushButton * pushButton, StationHydro * station, int i)
+void PushButton(QPushButton * pushButton, const StationHydro * station, int i)
 {
     pushButton->setMaximumHeight(18);
     pushButton->setToolTip(station->Identifiant().first); // code de la station hydro
@@ -435,6 +435,8 @@ void FenetrePrincipale::Affichage_menu_sites_web(void)
     for (int i(1); i < fichier->matrix.size(); ++i){
             QAction * action = new QAction(fichier->matrix[i][0]); // nom générique du site
             action->setWhatsThis(fichier->matrix[i][1]);           // adresse internet du site
+            QIcon icon(QCoreApplication::applicationDirPath() + "/databank/pictogramme/" + fichier->matrix[i][2]);
+            action->setIcon(icon);
             sites.append(action);
         }
     ui->menu_sites_web->addActions(sites);
@@ -462,9 +464,16 @@ void FenetrePrincipale::Affichage_menu_crues_historiques(void)
         for(QSet<QString>::const_iterator it_s = it_m.value().cbegin(); it_s != it_m.value().cend(); ++it_s){
             QAction * action = new QAction(*it_s);  // nom du cours d'eau
             action->setWhatsThis(it_m.key());       // nom du bassin versant
+            QIcon icon(QCoreApplication::applicationDirPath() + "/databank/pictogramme/" + it_m.key() + ".png");
+            action->setIcon(icon);
             cours_d_eau.append(action);
         }
-        ui->menu_crues_historiques->addMenu(it_m.key())->addActions(cours_d_eau);
+        QMenu *menu = new QMenu();
+        menu->setTitle(it_m.key());
+        QIcon icon(QCoreApplication::applicationDirPath() + "/databank/pictogramme/bv_"+ it_m.key() +".png");
+        menu->setIcon(icon);
+        menu->addActions(cours_d_eau);
+        ui->menu_crues_historiques->addMenu(menu);
     }
 }
 
