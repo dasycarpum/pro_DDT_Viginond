@@ -27,6 +27,7 @@ class FenetrePrincipale : public QMainWindow
     Q_OBJECT
     Ui::FenetrePrincipale *ui;
 
+    bool acces_internet;                    // accès au réseau internet disponible (avec ou sans proxy)
     QList<StationHydro *> stations_hydro;   // liste de toutes les stations hydrométriques
     QButtonGroup *grp_radioButton_bassin;   // tous les bassins versants (sous forme de QRadioButton) - dans 1 QGroupBox
     QButtonGroup *grp_pushButton_station;   // toutes les stations d'un cours d'eau (sous forme de QPushButton) - dans 1 QTabWidget

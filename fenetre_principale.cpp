@@ -9,8 +9,10 @@ FenetrePrincipale::FenetrePrincipale(QWidget *parent)
     ui->setupUi(this);
 
     /* Test d'un accès au réseau internet */
+    acces_internet = false;
     Reseau *reseau = new Reseau();
-    reseau->Test_connexion(ui->textBrowser_internet);
+    if (reseau->Test_connexion(ui->textBrowser_internet))
+        acces_internet = true;
     delete reseau;
 
     /* Constitution de la BDD des stations hydrométriques et de leurs caractéristiques */
@@ -36,7 +38,6 @@ FenetrePrincipale::FenetrePrincipale(QWidget *parent)
     connect(ui->menu_crues_historiques, SIGNAL(triggered(QAction *)), this, SLOT(Menu_crues_historiques(QAction *)));
     connect(ui->action_manuel_utilisation, SIGNAL(triggered()), this, SLOT(Menu_aide()));
     connect(ui->action_QGiS_3_4_5, SIGNAL(triggered()), this, SLOT(Menu_aide()));
-
 }
 
 FenetrePrincipale::~FenetrePrincipale()
@@ -68,49 +69,60 @@ QMap<QDateTime, double> Typage_releve(QVector<QVector<QString>> hh_str)
     ==================================== */
 void FenetrePrincipale::Telechargement_Vigicrues(void)
 {
-    /* Configuration du proxy pour connexion à un réseau protégé */
-    Proxy * proxy = new Proxy();
-    QString site(Selection_proxy());
-    if (site != "Aucun"){
-        proxy->setType(QNetworkProxy::ProxyType(proxy->Proxies()[site][0].toInt()));
-        proxy->setHostName(proxy->Proxies()[site][1]);
-        proxy->setPort(quint16(proxy->Proxies()[site][2].toUInt()));
+    if (acces_internet){
+        /* Configuration du proxy pour connexion à un réseau protégé */
+        Proxy * proxy = new Proxy();
+        QString site(Selection_proxy());
+        if (site != "Aucun"){
+            proxy->setType(QNetworkProxy::ProxyType(proxy->Proxies()[site][0].toInt()));
+            proxy->setHostName(proxy->Proxies()[site][1]);
+            proxy->setPort(quint16(proxy->Proxies()[site][2].toUInt()));
+        }
+
+        /* Boucle sur les stations hydro */
+        for (int i(0); i < stations_hydro.size(); ++i){
+
+            /* Téléchargement des données (historiques des hauteurs d'eau par station) sur le site Vigicrues, au format XML */
+            Reseau *reseau = new Reseau(proxy);
+            reseau->Enregistrer_page_web(QUrl("https://www.vigicrues.gouv.fr/services/observations.xml/?CdStationHydro=" + stations_hydro[i]->Identifiant().first));
+
+            /* Conversion du tableau d'octets (QByteArray) en un tableau 2D indicé 'temps-hauteur' */
+            QList<QString> liste_noeud_xml; liste_noeud_xml << "DtObsHydro" << "ResObsHydro";
+            QVector<QVector<QString>> hauteurs_horaires_str = FichierXml::Lecture_valeur(reseau->Donnee_page_web(), liste_noeud_xml);
+
+            delete reseau;
+
+            /* Typage des chaînes de caractères (QString) du tableau 2D : conversion des 2 champs en 'QDateTime' et 'double' */
+            stations_hydro[i]->Hauteurs_horaires(Typage_releve(hauteurs_horaires_str));
+
+            /* Affichage du résultat (dernier relevé de hauteur) */
+            if (!stations_hydro[i]->Hauteurs_horaires().isEmpty())
+                ui->textBrowser_vigicrues->append(QString("<TABLE BORDER WIDTH=220 align=center CELLSPACING=1>"
+                                                          "<TR><TD WIDTH=120 BGCOLOR=#%1 align=left>%2</TD>"
+                                                          "<TD WIDTH=60 align=center>%3</TD>"
+                                                          "<TD WIDTH=50 align=center>%L4 mm</TD></TR></TABLE>")
+                                                            .arg(stations_hydro[i]->Bv_couleur())
+                                                            .arg(stations_hydro[i]->Identifiant().second)
+                                                            .arg(stations_hydro[i]->Hauteurs_horaires().lastKey().toString(Qt::ISODate))
+                                                            .arg(stations_hydro[i]->Hauteurs_horaires().last()));
+            else
+                ui->textBrowser_vigicrues->append(QString("<TABLE BORDER WIDTH=220 align=center CELLSPACING=1>"
+                                                          "<TR><TD WIDTH=120 align=left><font color=darkRed>%1</font></TD>"
+                                                          "<TD WIDTH=110 align=center><font color=darkRed>Donnée absente !</font></TD></TR></TABLE>")
+                                                            .arg(stations_hydro[i]->Identifiant().second));
+        }
+        /* Instanciation des radioButtons des bassins versants du territoire */
+        Affichage_radioButton_bassin();
     }
-
-    /* Boucle sur les stations hydro */
-    for (int i(0); i < stations_hydro.size(); ++i){
-
-        /* Téléchargement des données (historiques des hauteurs d'eau par station) sur le site Vigicrues, au format XML */
-        Reseau *reseau = new Reseau(proxy);
-        reseau->Enregistrer_page_web(QUrl("https://www.vigicrues.gouv.fr/services/observations.xml/?CdStationHydro=" + stations_hydro[i]->Identifiant().first));
-
-        /* Conversion du tableau d'octets (QByteArray) en un tableau 2D indicé 'temps-hauteur' */
-        QList<QString> liste_noeud_xml; liste_noeud_xml << "DtObsHydro" << "ResObsHydro";
-        QVector<QVector<QString>> hauteurs_horaires_str = FichierXml::Lecture_valeur(reseau->Donnee_page_web(), liste_noeud_xml);
-
-        delete reseau;
-
-        /* Typage des chaînes de caractères (QString) du tableau 2D : conversion des 2 champs en 'QDateTime' et 'double' */
-        stations_hydro[i]->Hauteurs_horaires(Typage_releve(hauteurs_horaires_str));
-
-        /* Affichage du résultat (dernier relevé de hauteur) */
-        if (!stations_hydro[i]->Hauteurs_horaires().isEmpty())
-            ui->textBrowser_vigicrues->append(QString("<TABLE BORDER WIDTH=220 align=center CELLSPACING=1>"
-                                                      "<TR><TD WIDTH=120 BGCOLOR=#%1 align=left>%2</TD>"
-                                                      "<TD WIDTH=60 align=center>%3</TD>"
-                                                      "<TD WIDTH=50 align=center>%L4 mm</TD></TR></TABLE>")
-                                                        .arg(stations_hydro[i]->Bv_couleur())
-                                                        .arg(stations_hydro[i]->Identifiant().second)
-                                                        .arg(stations_hydro[i]->Hauteurs_horaires().lastKey().toString(Qt::ISODate))
-                                                        .arg(stations_hydro[i]->Hauteurs_horaires().last()));
+    else{
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::critical(this, "Hors connexion", "Voulez-vous poursuivre en mode dégradé ?",
+                                      QMessageBox::Yes|QMessageBox::No);
+        if (reply == QMessageBox::Yes)
+            qDebug() << "OK";
         else
-            ui->textBrowser_vigicrues->append(QString("<TABLE BORDER WIDTH=220 align=center CELLSPACING=1>"
-                                                      "<TR><TD WIDTH=120 align=left><font color=darkRed>%1</font></TD>"
-                                                      "<TD WIDTH=110 align=center><font color=darkRed>Donnée absente !</font></TD></TR></TABLE>")
-                                                        .arg(stations_hydro[i]->Identifiant().second));
+            this->close();
     }
-    /* Instanciation des radioButtons des bassins versants du territoire */
-    Affichage_radioButton_bassin();
 }
 
 /** Identification du site de connexion et de son proxy
