@@ -116,10 +116,10 @@ void FenetrePrincipale::Telechargement_Vigicrues(void)
     }
     else{
         QMessageBox::StandardButton reply;
-        reply = QMessageBox::critical(this, "Hors connexion", "Voulez-vous poursuivre en mode dégradé ?",
+        reply = QMessageBox::warning(this, "Hors connexion", "Voulez-vous poursuivre en mode dégradé ?",
                                       QMessageBox::Yes|QMessageBox::No);
         if (reply == QMessageBox::Yes)
-            qDebug() << "OK";
+            Affichage_radioButton_bassin();
         else
             this->close();
     }
