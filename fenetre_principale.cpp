@@ -185,7 +185,8 @@ void FenetrePrincipale::Selection_bassin_versant(QAbstractButton * rb)
                 stations_par_cours_d_eau.append(stations_hydro[i]);
 
         /* Affichage */
-        Affichage_graphique(rb->text(), it.value(), stations_par_cours_d_eau);
+        if (acces_internet)
+            Affichage_graphique(rb->text(), it.value(), stations_par_cours_d_eau);
         Affichage_tableau(it.value(), stations_par_cours_d_eau);
     }
 
@@ -237,7 +238,7 @@ void FenetrePrincipale::Affichage_graphique(QString const& bassin_versant, QStri
     graph_entite_hydro->replot();
 }
 
-/* Colorisation des cellules du tableau des résultats selon la hauteur d'eau observée et la couleur de vigilance associée
+/* Colorisation des cellules du tableau des paramètres de crue selon la hauteur d'eau observée et la couleur de vigilance associée
    ---------------------------------------------------------------------------------------------------------------------- */
 QColor Couleur(QString couleur)
 {
@@ -256,6 +257,26 @@ QColor Couleur(QString couleur)
 
     return color;
 }
+/* Mise en forme du menu déroulant dans le tableau des paramètres de crue
+   ----------------------------------------------------------------------*/
+void ComboBox(QComboBox * comboBox, StationHydro * station, int i)
+{
+    comboBox->setLayoutDirection(Qt::RightToLeft);
+    comboBox->addItems(station->Liste_niveaux_crue());
+    comboBox->setCursor(Qt::PointingHandCursor);
+    comboBox->setWhatsThis(QString::number(i));
+    comboBox->setMaximumHeight(20);
+}
+
+/* Mise en forme du bouton dans le tableau des paramètres de crue
+   --------------------------------------------------------------*/
+void PushButton(QPushButton * pushButton, StationHydro * station, int i)
+{
+    pushButton->setMaximumHeight(18);
+    pushButton->setToolTip(station->Identifiant().first); // code de la station hydro
+    pushButton->setWhatsThis(QString::number(i)); // colonne du tableWidget
+    pushButton->setCursor(Qt::PointingHandCursor);
+}
 
 /** Tableau présentant les indicateurs de crue par station (1 onglet = 1 cours d'eau)
     ================================================================================= */
@@ -271,7 +292,7 @@ void FenetrePrincipale::Affichage_tableau(QString const& cours_d_eau, QList<Stat
 
         titre_colonne.push_back( stations_par_cours_d_eau[i]->Identifiant().second );
 
-        if (!stations_par_cours_d_eau.at(i)->Hauteurs_horaires().empty())
+        if (!stations_par_cours_d_eau.at(i)->Hauteurs_horaires().empty() && acces_internet){
             for (int j(0); j < titre_ligne.size(); ++j){
 
                 QTableWidgetItem *cellule = new QTableWidgetItem();
@@ -311,20 +332,13 @@ void FenetrePrincipale::Affichage_tableau(QString const& cours_d_eau, QList<Stat
                     }
                 case 5:{ // liste des niveaux de crue, affichée dans un menu déroulant
                     QComboBox *comboBox = new QComboBox();
-                    comboBox->setLayoutDirection(Qt::RightToLeft);
-                    comboBox->addItems(stations_par_cours_d_eau.at(i)->Liste_niveaux_crue());
-                    comboBox->setCursor(Qt::PointingHandCursor);
-                    comboBox->setWhatsThis(QString::number(i));
-                    comboBox->setMaximumHeight(20);
+                    ComboBox(comboBox, stations_par_cours_d_eau.at(i), i);
                     tableau->setCellWidget(j, i, comboBox);
                     break;
                     }
                 case 6:{ // pushButton pour que l'utilisateur puisse ouvrir les fenêtres 'Enjeux' et 'Cartographie' de la station, sur base du niveau de crue
                     QPushButton *pushButton = new QPushButton("OK");
-                    pushButton->setMaximumHeight(18);
-                    pushButton->setToolTip(stations_par_cours_d_eau.at(i)->Identifiant().first); // code de la station hydro
-                    pushButton->setWhatsThis(QString::number(i)); // colonne du tableWidget
-                    pushButton->setCursor(Qt::PointingHandCursor);
+                    PushButton(pushButton, stations_par_cours_d_eau.at(i), i);
                     grp_pushButton_station->addButton(pushButton);
                     tableau->setCellWidget(j, i, pushButton);
                     break;
@@ -341,6 +355,29 @@ void FenetrePrincipale::Affichage_tableau(QString const& cours_d_eau, QList<Stat
                 }
 
             }
+        }
+        else if (!acces_internet){
+            for (int j(5); j < titre_ligne.size(); ++j){
+                switch(j){
+                case 5:{ // liste des niveaux de crue, affichée dans un menu déroulant
+                    QComboBox *comboBox = new QComboBox();
+                    ComboBox(comboBox, stations_par_cours_d_eau.at(i), i);
+                    tableau->setCellWidget(j, i, comboBox);
+                    break;
+                    }
+                case 6:{ // pushButton pour que l'utilisateur puisse ouvrir les fenêtres 'Enjeux' et 'Cartographie' de la station, sur base du niveau de crue
+                    QPushButton *pushButton = new QPushButton("OK");
+                    PushButton(pushButton, stations_par_cours_d_eau.at(i), i);
+                    grp_pushButton_station->addButton(pushButton);
+                    tableau->setCellWidget(j, i, pushButton);
+                    break;
+                    }
+                default:
+                    break;
+                }
+            }
+        }
+
     }
 
     tableau->setVerticalHeaderLabels(titre_ligne);
