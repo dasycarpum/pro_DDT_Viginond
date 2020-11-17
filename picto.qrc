@@ -2,13 +2,14 @@
     <qresource prefix="/">
         <file>release/databank/pictogramme/inondation.png</file>
         <file>release/databank/pictogramme/marianne.png</file>
+        <file>release/databank/pictogramme/manuel.png</file>
+        <file>release/databank/pictogramme/qgis.png</file>
+        <file>release/databank/pictogramme/meteo.png</file>
+        <file>release/databank/pictogramme/download.png</file>
         <file>release/databank/pictogramme/Moselle.png</file>
         <file>release/databank/pictogramme/Nied.png</file>
         <file>release/databank/pictogramme/Rosselle.png</file>
         <file>release/databank/pictogramme/Sarre amont.png</file>
         <file>release/databank/pictogramme/Sarre aval.png</file>
-        <file>release/databank/pictogramme/manuel.png</file>
-        <file>release/databank/pictogramme/qgis.png</file>
-        <file>release/databank/pictogramme/meteo.png</file>
     </qresource>
 </RCC>

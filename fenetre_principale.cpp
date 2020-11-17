@@ -1,12 +1,24 @@
 #include "fenetre_principale.h"
 #include "ui_fenetre_principale.h"
-#include <initializer_list>
 
 FenetrePrincipale::FenetrePrincipale(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::FenetrePrincipale)
 {
     ui->setupUi(this);
+
+    /* Style */
+    ui->groupBox_proxy->setObjectName("box");
+    ui->groupBox_proxy->setStyleSheet("QGroupBox#box { font-weight:bold }");
+    ui->groupBox_requete->setObjectName("box");
+    ui->groupBox_requete->setStyleSheet("QGroupBox#box { font-weight:bold }");
+    ui->groupBox_visualisation->setObjectName("box");
+    ui->groupBox_visualisation->setStyleSheet("QGroupBox#box { font-weight:bold }");
+    ui->groupBox_bassin_versant->setObjectName("box");
+    ui->groupBox_bassin_versant->setStyleSheet("QGroupBox#box { font-weight:bold }");
+
+    QPalette palette; palette.setColor(QPalette::Button, QColor(133, 163, 195));
+    ui->pushButton_telechargement->setPalette(palette);
 
     /* Test d'un accès au réseau internet */
     acces_internet = false;
