@@ -34,6 +34,8 @@ FenetrePrincipale::FenetrePrincipale(QWidget *parent)
     connect(ui->menu_sites_web, SIGNAL(triggered(QAction *)), this, SLOT(Menu_sites_web(QAction *)));
     Affichage_menu_crues_historiques();
     connect(ui->menu_crues_historiques, SIGNAL(triggered(QAction *)), this, SLOT(Menu_crues_historiques(QAction *)));
+    connect(ui->action_manuel_utilisation, SIGNAL(triggered()), this, SLOT(Menu_aide()));
+    connect(ui->action_QGiS_3_4_5, SIGNAL(triggered()), this, SLOT(Menu_aide()));
 
 }
 
@@ -444,4 +446,18 @@ void FenetrePrincipale::Menu_crues_historiques(QAction * action)
     msgBox.setWindowTitle(ui->menu_crues_historiques->title());
     msgBox.setText(textMessage);
     msgBox.exec();
+}
+
+void FenetrePrincipale::Menu_aide(void)
+{
+    QAction * action = qobject_cast<QAction *>(sender());
+
+    if (action->text().contains("manuel", Qt::CaseInsensitive)){
+        QUrl url("file:///databank/documentation/manuel_utilisation.pdf");
+        QUrl urlFichier = QUrl::fromLocalFile(QCoreApplication::applicationDirPath() + url.toLocalFile());
+        QDesktopServices::openUrl(urlFichier);
+    }
+    else
+        QDesktopServices::openUrl(QUrl(action->whatsThis()));
+
 }

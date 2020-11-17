@@ -199,7 +199,7 @@
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuArr_t_s_pr_fectoraux">
+   <widget class="QMenu" name="menu_arretes_prefectoraux">
     <property name="title">
      <string>Arrêtés préfectoraux</string>
     </property>
@@ -216,9 +216,17 @@
      <string>Crues historiques</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menu_aide">
+    <property name="title">
+     <string>Aide</string>
+    </property>
+    <addaction name="action_manuel_utilisation"/>
+    <addaction name="action_QGiS_3_4_5"/>
+   </widget>
    <addaction name="menu_crues_historiques"/>
-   <addaction name="menuArr_t_s_pr_fectoraux"/>
+   <addaction name="menu_arretes_prefectoraux"/>
    <addaction name="menu_sites_web"/>
+   <addaction name="menu_aide"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="action_Meuse_Moselle">
@@ -229,6 +237,22 @@
   <action name="action_Rhin_Sarre">
    <property name="text">
     <string>Rhin Sarre</string>
+   </property>
+  </action>
+  <action name="action_manuel_utilisation">
+   <property name="text">
+    <string>Manuel d'utilisation</string>
+   </property>
+   <property name="toolTip">
+    <string>Manuel d'utilisation de Viginond</string>
+   </property>
+  </action>
+  <action name="action_QGiS_3_4_5">
+   <property name="text">
+    <string>QGiS 3.4.5</string>
+   </property>
+   <property name="whatsThis">
+    <string>https://docs.qgis.org/3.4/fr/docs/</string>
    </property>
   </action>
  </widget>

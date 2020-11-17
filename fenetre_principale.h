@@ -50,7 +50,7 @@ public slots:
     void Menu_arretes_prefectoraux(void);
     void Menu_sites_web(QAction * action);
     void Menu_crues_historiques(QAction * action);
-
+    void Menu_aide(void);
 
 };
 #endif // FENETREPRINCIPALE_H
