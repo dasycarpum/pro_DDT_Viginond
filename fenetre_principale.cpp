@@ -115,7 +115,7 @@ void FenetrePrincipale::Telechargement_Vigicrues(void)
                                                           "<TD WIDTH=50 align=center>%L4 mm</TD></TR></TABLE>")
                                                             .arg(stations_hydro[i]->Bv_couleur())
                                                             .arg(stations_hydro[i]->Identifiant().second)
-                                                            .arg(stations_hydro[i]->Hauteurs_horaires().lastKey().toString(Qt::ISODate))
+                                                            .arg(stations_hydro[i]->Hauteurs_horaires().lastKey().toString("dd MMM à hh:mm"))
                                                             .arg(stations_hydro[i]->Hauteurs_horaires().last()));
             else
                 ui->textBrowser_vigicrues->append(QString("<TABLE BORDER WIDTH=220 align=center CELLSPACING=1>"
