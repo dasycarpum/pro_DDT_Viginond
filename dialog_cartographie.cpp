@@ -260,10 +260,9 @@ void DialogCarto::Affichage_QGiS(void)
 
     /* Exécution de QGiS */
     QProcess *process = new QProcess(this);
-    QString chemin = QDir::toNativeSeparators(QCoreApplication::applicationDirPath())+ "//QGiS_3.4.5//usbgis//apps//qgis//bin//";
+    QString chemin = QDir::toNativeSeparators(QCoreApplication::applicationDirPath())+ "\\QGiS_3.4.5\\usbgis\\apps\\qgis\\bin\\";
     process->setWorkingDirectory(chemin);
-    process->startDetached(chemin + "qgis-ltr.bat", QStringList());
-    process->waitForFinished();
+    process->start(chemin + "qgis-ltr.bat", QStringList());
 }
 
 /** Gère les checks des cases à cocher dans le QTreeWidget (entreQTreeWidgetItem parent et enfants)
