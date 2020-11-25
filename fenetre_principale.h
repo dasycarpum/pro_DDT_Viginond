@@ -17,6 +17,7 @@
 #include "station_hydro.h"
 #include "graphique.h"
 #include "dialog_cartographie.h"
+#include "dialog_proxy.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class FenetrePrincipale; }
@@ -44,6 +45,7 @@ public:
     void Affichage_menu_crues_historiques(void);
 
 public slots:
+    void Affichage_dialog_proxy(void);
     void Telechargement_Vigicrues(void);
     void Selection_bassin_versant(QAbstractButton *);
     void Affichage_fenetres_annexes(QAbstractButton *);

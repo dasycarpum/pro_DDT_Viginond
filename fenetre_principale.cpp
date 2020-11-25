@@ -27,6 +27,9 @@ FenetrePrincipale::FenetrePrincipale(QWidget *parent)
         acces_internet = true;
     delete reseau;
 
+    /* Paramétrage d'un proxy par l'utilisateur */
+    connect(ui->radioButton_proxy_autre, SIGNAL(clicked()), this, SLOT(Affichage_dialog_proxy()));
+
     /* Constitution de la BDD des stations hydrométriques et de leurs caractéristiques */
     stations_hydro = StationHydro::Liste_stations_hydro();
 
@@ -75,6 +78,15 @@ QMap<QDateTime, double> Typage_releve(QVector<QVector<QString>> hh_str)
     }
 
     return  hauteurs_horaires;
+}
+
+/** Personnalisation du proxy par une interface de dialogue
+    ======================================================= */
+void FenetrePrincipale::Affichage_dialog_proxy(void)
+{
+    /* Instanciation de la boîte de dialogue */
+    DialogProxy *dialog_proxy = new DialogProxy();
+    dialog_proxy->show();
 }
 
 /** Enregistrement des données Vigicrues
