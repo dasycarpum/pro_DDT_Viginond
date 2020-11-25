@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1024</width>
-    <height>807</height>
+    <height>815</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,6 +34,16 @@
          </property>
          <property name="text">
           <string>Téléchargement des données Vigicrues</string>
+         </property>
+         <property name="icon">
+          <iconset resource="picto.qrc">
+           <normaloff>:/release/databank/pictogramme/download.png</normaloff>:/release/databank/pictogramme/download.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>24</width>
+           <height>24</height>
+          </size>
          </property>
         </widget>
        </item>
@@ -199,10 +209,82 @@
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menu_arretes_prefectoraux">
+    <property name="title">
+     <string>Arrêtés préfectoraux</string>
+    </property>
+    <addaction name="action_Meuse_Moselle"/>
+    <addaction name="action_Rhin_Sarre"/>
+   </widget>
+   <widget class="QMenu" name="menu_sites_web">
+    <property name="title">
+     <string>Sites Web</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menu_crues_historiques">
+    <property name="title">
+     <string>Crues historiques</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menu_aide">
+    <property name="title">
+     <string>Aide</string>
+    </property>
+    <addaction name="action_manuel_utilisation"/>
+    <addaction name="action_QGiS_3_4_5"/>
+   </widget>
+   <addaction name="menu_crues_historiques"/>
+   <addaction name="menu_arretes_prefectoraux"/>
+   <addaction name="menu_sites_web"/>
+   <addaction name="menu_aide"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="action_Meuse_Moselle">
+   <property name="icon">
+    <iconset resource="picto.qrc">
+     <normaloff>:/release/databank/pictogramme/marianne.png</normaloff>:/release/databank/pictogramme/marianne.png</iconset>
+   </property>
+   <property name="text">
+    <string>Meuse Moselle</string>
+   </property>
+  </action>
+  <action name="action_Rhin_Sarre">
+   <property name="icon">
+    <iconset resource="picto.qrc">
+     <normaloff>:/release/databank/pictogramme/marianne.png</normaloff>:/release/databank/pictogramme/marianne.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rhin Sarre</string>
+   </property>
+  </action>
+  <action name="action_manuel_utilisation">
+   <property name="icon">
+    <iconset resource="picto.qrc">
+     <normaloff>:/release/databank/pictogramme/manuel.png</normaloff>:/release/databank/pictogramme/manuel.png</iconset>
+   </property>
+   <property name="text">
+    <string>Manuel d'utilisation</string>
+   </property>
+   <property name="toolTip">
+    <string>Manuel d'utilisation de Viginond</string>
+   </property>
+  </action>
+  <action name="action_QGiS_3_4_5">
+   <property name="icon">
+    <iconset resource="picto.qrc">
+     <normaloff>:/release/databank/pictogramme/qgis.png</normaloff>:/release/databank/pictogramme/qgis.png</iconset>
+   </property>
+   <property name="text">
+    <string>QGiS 3.4.5</string>
+   </property>
+   <property name="whatsThis">
+    <string>https://docs.qgis.org/3.4/fr/docs/</string>
+   </property>
+  </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="picto.qrc"/>
+ </resources>
  <connections/>
  <buttongroups>
   <buttongroup name="buttonGroup_proxy"/>

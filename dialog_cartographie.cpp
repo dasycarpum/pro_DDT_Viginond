@@ -6,6 +6,14 @@ DialogCarto::DialogCarto(const StationHydro * s,  double h, QWidget *parent) :
 {
     ui->setupUi(this);
 
+    /* Style */
+    ui->groupBox_information->setObjectName("box");
+    ui->groupBox_information->setStyleSheet("QGroupBox#box { font-weight:bold }");
+    ui->groupBox_fond_carto->setObjectName("box");
+    ui->groupBox_fond_carto->setStyleSheet("QGroupBox#box { font-weight:bold }");
+    ui->groupBox_inondation->setObjectName("box");
+    ui->groupBox_inondation->setStyleSheet("QGroupBox#box { font-weight:bold }");
+
     /* Test d'un accès au réseau internet et aux serveurs cartographiques */
    Affichage_infos_WMS();
    /* Liste des couches SIG disponibles pour l'analyse de crue  (selon station et hauteur de crue) */
@@ -136,7 +144,7 @@ void DialogCarto::Affichage_infos_SIG(void)
 
     item_0 = new QTreeWidgetItem();
     item_0->setCheckState(0, Qt::Checked);
-    item_0->setText(0, sig_zip.isEmpty() ? "Pas de ZIP-ZICH" : "ZIP-ZICH");
+    item_0->setText(0, sig_zip.isEmpty() ? "Pas de ZIP-ZICH" : "Zones inondées");
 
     ui->treeWidget_carto_zip->addTopLevelItem(item_0);
 
@@ -252,10 +260,9 @@ void DialogCarto::Affichage_QGiS(void)
 
     /* Exécution de QGiS */
     QProcess *process = new QProcess(this);
-    QString chemin = QDir::toNativeSeparators(QCoreApplication::applicationDirPath())+ "//QGiS_3.4.5//usbgis//apps//qgis//bin//";
+    QString chemin = QDir::toNativeSeparators(QCoreApplication::applicationDirPath())+ "\\QGiS_3.4.5\\usbgis\\apps\\qgis\\bin\\";
     process->setWorkingDirectory(chemin);
-    process->startDetached(chemin + "qgis-ltr.bat", QStringList());
-    process->waitForFinished();
+    process->start(chemin + "qgis-ltr.bat", QStringList());
 }
 
 /** Gère les checks des cases à cocher dans le QTreeWidget (entreQTreeWidgetItem parent et enfants)

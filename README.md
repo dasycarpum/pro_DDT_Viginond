@@ -23,3 +23,5 @@ l'application, de type IHM, assiste l'utilisateur en lui fournissant de manière
     ▪ Bibliothèque complémentaire : qwt (version 6.1.4)
     ▪ Gestionnaire de versions du code : Git (version 2.28.0)
     ▪ Plateforme applicative : Azure Devops sous https://dev.azure.com/dasycarpum-pro-DDT/Viginond%2057
+
+# Version V2 du 25 novembre 2020

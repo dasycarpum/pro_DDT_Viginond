@@ -47,3 +47,6 @@ CMakeLists.txt.user*
 *.srctrldb
 *.srctrlprj
 *.json
+
+# release (ajout 17/11/2020)
+/release/*

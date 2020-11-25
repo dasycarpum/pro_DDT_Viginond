@@ -7,9 +7,24 @@ FenetrePrincipale::FenetrePrincipale(QWidget *parent)
 {
     ui->setupUi(this);
 
+    /* Style */
+    ui->groupBox_proxy->setObjectName("box");
+    ui->groupBox_proxy->setStyleSheet("QGroupBox#box { font-weight:bold }");
+    ui->groupBox_requete->setObjectName("box");
+    ui->groupBox_requete->setStyleSheet("QGroupBox#box { font-weight:bold }");
+    ui->groupBox_visualisation->setObjectName("box");
+    ui->groupBox_visualisation->setStyleSheet("QGroupBox#box { font-weight:bold }");
+    ui->groupBox_bassin_versant->setObjectName("box");
+    ui->groupBox_bassin_versant->setStyleSheet("QGroupBox#box { font-weight:bold }");
+
+    QPalette palette; palette.setColor(QPalette::Button, QColor(133, 163, 195));
+    ui->pushButton_telechargement->setPalette(palette);
+
     /* Test d'un accès au réseau internet */
+    acces_internet = false;
     Reseau *reseau = new Reseau();
-    reseau->Test_connexion(ui->textBrowser_internet);
+    if (reseau->Test_connexion(ui->textBrowser_internet))
+        acces_internet = true;
     delete reseau;
 
     /* Constitution de la BDD des stations hydrométriques et de leurs caractéristiques */
@@ -26,6 +41,15 @@ FenetrePrincipale::FenetrePrincipale(QWidget *parent)
     grp_pushButton_station = new QButtonGroup();
     connect(grp_pushButton_station, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(Affichage_fenetres_annexes(QAbstractButton *)));
 
+    /* Menus */
+    connect(ui->action_Meuse_Moselle, SIGNAL(triggered()), this, SLOT(Menu_arretes_prefectoraux()));
+    connect(ui->action_Rhin_Sarre, SIGNAL(triggered()), this, SLOT(Menu_arretes_prefectoraux()));
+    Affichage_menu_sites_web();
+    connect(ui->menu_sites_web, SIGNAL(triggered(QAction *)), this, SLOT(Menu_sites_web(QAction *)));
+    Affichage_menu_crues_historiques();
+    connect(ui->menu_crues_historiques, SIGNAL(triggered(QAction *)), this, SLOT(Menu_crues_historiques(QAction *)));
+    connect(ui->action_manuel_utilisation, SIGNAL(triggered()), this, SLOT(Menu_aide()));
+    connect(ui->action_QGiS_3_4_5, SIGNAL(triggered()), this, SLOT(Menu_aide()));
 }
 
 FenetrePrincipale::~FenetrePrincipale()
@@ -57,49 +81,60 @@ QMap<QDateTime, double> Typage_releve(QVector<QVector<QString>> hh_str)
     ==================================== */
 void FenetrePrincipale::Telechargement_Vigicrues(void)
 {
-    /* Configuration du proxy pour connexion à un réseau protégé */
-    Proxy * proxy = new Proxy();
-    QString site(Selection_proxy());
-    if (site != "Aucun"){
-        proxy->setType(QNetworkProxy::ProxyType(proxy->Proxies()[site][0].toInt()));
-        proxy->setHostName(proxy->Proxies()[site][1]);
-        proxy->setPort(quint16(proxy->Proxies()[site][2].toUInt()));
+    if (acces_internet){
+        /* Configuration du proxy pour connexion à un réseau protégé */
+        Proxy * proxy = new Proxy();
+        QString site(Selection_proxy());
+        if (site != "Aucun"){
+            proxy->setType(QNetworkProxy::ProxyType(proxy->Proxies()[site][0].toInt()));
+            proxy->setHostName(proxy->Proxies()[site][1]);
+            proxy->setPort(quint16(proxy->Proxies()[site][2].toUInt()));
+        }
+
+        /* Boucle sur les stations hydro */
+        for (int i(0); i < stations_hydro.size(); ++i){
+
+            /* Téléchargement des données (historiques des hauteurs d'eau par station) sur le site Vigicrues, au format XML */
+            Reseau *reseau = new Reseau(proxy);
+            reseau->Enregistrer_page_web(QUrl("https://www.vigicrues.gouv.fr/services/observations.xml/?CdStationHydro=" + stations_hydro[i]->Identifiant().first));
+
+            /* Conversion du tableau d'octets (QByteArray) en un tableau 2D indicé 'temps-hauteur' */
+            QList<QString> liste_noeud_xml; liste_noeud_xml << "DtObsHydro" << "ResObsHydro";
+            QVector<QVector<QString>> hauteurs_horaires_str = FichierXml::Lecture_valeur(reseau->Donnee_page_web(), liste_noeud_xml);
+
+            delete reseau;
+
+            /* Typage des chaînes de caractères (QString) du tableau 2D : conversion des 2 champs en 'QDateTime' et 'double' */
+            stations_hydro[i]->Hauteurs_horaires(Typage_releve(hauteurs_horaires_str));
+
+            /* Affichage du résultat (dernier relevé de hauteur) */
+            if (!stations_hydro[i]->Hauteurs_horaires().isEmpty())
+                ui->textBrowser_vigicrues->append(QString("<TABLE BORDER WIDTH=220 align=center CELLSPACING=1>"
+                                                          "<TR><TD WIDTH=120 BGCOLOR=#%1 align=left>%2</TD>"
+                                                          "<TD WIDTH=60 align=center>%3</TD>"
+                                                          "<TD WIDTH=50 align=center>%L4 mm</TD></TR></TABLE>")
+                                                            .arg(stations_hydro[i]->Bv_couleur())
+                                                            .arg(stations_hydro[i]->Identifiant().second)
+                                                            .arg(stations_hydro[i]->Hauteurs_horaires().lastKey().toString("dd MMM à hh:mm"))
+                                                            .arg(stations_hydro[i]->Hauteurs_horaires().last()));
+            else
+                ui->textBrowser_vigicrues->append(QString("<TABLE BORDER WIDTH=220 align=center CELLSPACING=1>"
+                                                          "<TR><TD WIDTH=120 align=left><font color=darkRed>%1</font></TD>"
+                                                          "<TD WIDTH=110 align=center><font color=darkRed>Donnée absente !</font></TD></TR></TABLE>")
+                                                            .arg(stations_hydro[i]->Identifiant().second));
+        }
+        /* Instanciation des radioButtons des bassins versants du territoire */
+        Affichage_radioButton_bassin();
     }
-
-    /* Boucle sur les stations hydro */
-    for (int i(0); i < stations_hydro.size(); ++i){
-
-        /* Téléchargement des données (historiques des hauteurs d'eau par station) sur le site Vigicrues, au format XML */
-        Reseau *reseau = new Reseau(proxy);
-        reseau->Enregistrer_page_web(QUrl("https://www.vigicrues.gouv.fr/services/observations.xml/?CdStationHydro=" + stations_hydro[i]->Identifiant().first));
-
-        /* Conversion du tableau d'octets (QByteArray) en un tableau 2D indicé 'temps-hauteur' */
-        QList<QString> liste_noeud_xml; liste_noeud_xml << "DtObsHydro" << "ResObsHydro";
-        QVector<QVector<QString>> hauteurs_horaires_str = FichierXml::Lecture_valeur(reseau->Donnee_page_web(), liste_noeud_xml);
-
-        delete reseau;
-
-        /* Typage des chaînes de caractères (QString) du tableau 2D : conversion des 2 champs en 'QDateTime' et 'double' */
-        stations_hydro[i]->Hauteurs_horaires(Typage_releve(hauteurs_horaires_str));
-
-        /* Affichage du résultat (dernier relevé de hauteur) */
-        if (!stations_hydro[i]->Hauteurs_horaires().isEmpty())
-            ui->textBrowser_vigicrues->append(QString("<TABLE BORDER WIDTH=220 align=center CELLSPACING=1>"
-                                                      "<TR><TD WIDTH=120 BGCOLOR=#%1 align=left>%2</TD>"
-                                                      "<TD WIDTH=60 align=center>%3</TD>"
-                                                      "<TD WIDTH=50 align=center>%L4 mm</TD></TR></TABLE>")
-                                                        .arg(stations_hydro[i]->Bv_couleur())
-                                                        .arg(stations_hydro[i]->Identifiant().second)
-                                                        .arg(stations_hydro[i]->Hauteurs_horaires().lastKey().toString(Qt::ISODate))
-                                                        .arg(stations_hydro[i]->Hauteurs_horaires().last()));
+    else{
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::warning(this, "Hors connexion", "Voulez-vous poursuivre en mode dégradé ?",
+                                      QMessageBox::Yes|QMessageBox::No);
+        if (reply == QMessageBox::Yes)
+            Affichage_radioButton_bassin();
         else
-            ui->textBrowser_vigicrues->append(QString("<TABLE BORDER WIDTH=220 align=center CELLSPACING=1>"
-                                                      "<TR><TD WIDTH=120 align=left><font color=darkRed>%1</font></TD>"
-                                                      "<TD WIDTH=110 align=center><font color=darkRed>Donnée absente !</font></TD></TR></TABLE>")
-                                                        .arg(stations_hydro[i]->Identifiant().second));
+            this->close();
     }
-    /* Instanciation des radioButtons des bassins versants du territoire */
-    Affichage_radioButton_bassin();
 }
 
 /** Identification du site de connexion et de son proxy
@@ -162,7 +197,8 @@ void FenetrePrincipale::Selection_bassin_versant(QAbstractButton * rb)
                 stations_par_cours_d_eau.append(stations_hydro[i]);
 
         /* Affichage */
-        Affichage_graphique(rb->text(), it.value(), stations_par_cours_d_eau);
+        if (acces_internet)
+            Affichage_graphique(rb->text(), it.value(), stations_par_cours_d_eau);
         Affichage_tableau(it.value(), stations_par_cours_d_eau);
     }
 
@@ -214,7 +250,7 @@ void FenetrePrincipale::Affichage_graphique(QString const& bassin_versant, QStri
     graph_entite_hydro->replot();
 }
 
-/* Colorisation des cellules du tableau des résultats selon la hauteur d'eau observée et la couleur de vigilance associée
+/* Colorisation des cellules du tableau des paramètres de crue selon la hauteur d'eau observée et la couleur de vigilance associée
    ---------------------------------------------------------------------------------------------------------------------- */
 QColor Couleur(QString couleur)
 {
@@ -233,6 +269,26 @@ QColor Couleur(QString couleur)
 
     return color;
 }
+/* Mise en forme du menu déroulant dans le tableau des paramètres de crue
+   ----------------------------------------------------------------------*/
+void ComboBox(QComboBox * comboBox, const StationHydro * station, int i)
+{
+    comboBox->setLayoutDirection(Qt::RightToLeft);
+    comboBox->addItems(station->Liste_niveaux_crue());
+    comboBox->setCursor(Qt::PointingHandCursor);
+    comboBox->setWhatsThis(QString::number(i));
+    comboBox->setMaximumHeight(20);
+}
+
+/* Mise en forme du bouton dans le tableau des paramètres de crue
+   --------------------------------------------------------------*/
+void PushButton(QPushButton * pushButton, const StationHydro * station, int i)
+{
+    pushButton->setMaximumHeight(18);
+    pushButton->setToolTip(station->Identifiant().first); // code de la station hydro
+    pushButton->setWhatsThis(QString::number(i)); // colonne du tableWidget
+    pushButton->setCursor(Qt::PointingHandCursor);
+}
 
 /** Tableau présentant les indicateurs de crue par station (1 onglet = 1 cours d'eau)
     ================================================================================= */
@@ -248,7 +304,7 @@ void FenetrePrincipale::Affichage_tableau(QString const& cours_d_eau, QList<Stat
 
         titre_colonne.push_back( stations_par_cours_d_eau[i]->Identifiant().second );
 
-        if (!stations_par_cours_d_eau.at(i)->Hauteurs_horaires().empty())
+        if (!stations_par_cours_d_eau.at(i)->Hauteurs_horaires().empty() && acces_internet){
             for (int j(0); j < titre_ligne.size(); ++j){
 
                 QTableWidgetItem *cellule = new QTableWidgetItem();
@@ -288,20 +344,13 @@ void FenetrePrincipale::Affichage_tableau(QString const& cours_d_eau, QList<Stat
                     }
                 case 5:{ // liste des niveaux de crue, affichée dans un menu déroulant
                     QComboBox *comboBox = new QComboBox();
-                    comboBox->setLayoutDirection(Qt::RightToLeft);
-                    comboBox->addItems(stations_par_cours_d_eau.at(i)->Liste_niveaux_crue());
-                    comboBox->setCursor(Qt::PointingHandCursor);
-                    comboBox->setWhatsThis(QString::number(i));
-                    comboBox->setMaximumHeight(20);
+                    ComboBox(comboBox, stations_par_cours_d_eau.at(i), i);
                     tableau->setCellWidget(j, i, comboBox);
                     break;
                     }
                 case 6:{ // pushButton pour que l'utilisateur puisse ouvrir les fenêtres 'Enjeux' et 'Cartographie' de la station, sur base du niveau de crue
                     QPushButton *pushButton = new QPushButton("OK");
-                    pushButton->setMaximumHeight(18);
-                    pushButton->setToolTip(stations_par_cours_d_eau.at(i)->Identifiant().first); // code de la station hydro
-                    pushButton->setWhatsThis(QString::number(i)); // colonne du tableWidget
-                    pushButton->setCursor(Qt::PointingHandCursor);
+                    PushButton(pushButton, stations_par_cours_d_eau.at(i), i);
                     grp_pushButton_station->addButton(pushButton);
                     tableau->setCellWidget(j, i, pushButton);
                     break;
@@ -318,6 +367,29 @@ void FenetrePrincipale::Affichage_tableau(QString const& cours_d_eau, QList<Stat
                 }
 
             }
+        }
+        else if (!acces_internet){
+            for (int j(5); j < titre_ligne.size(); ++j){
+                switch(j){
+                case 5:{ // liste des niveaux de crue, affichée dans un menu déroulant
+                    QComboBox *comboBox = new QComboBox();
+                    ComboBox(comboBox, stations_par_cours_d_eau.at(i), i);
+                    tableau->setCellWidget(j, i, comboBox);
+                    break;
+                    }
+                case 6:{ // pushButton pour que l'utilisateur puisse ouvrir les fenêtres 'Enjeux' et 'Cartographie' de la station, sur base du niveau de crue
+                    QPushButton *pushButton = new QPushButton("OK");
+                    PushButton(pushButton, stations_par_cours_d_eau.at(i), i);
+                    grp_pushButton_station->addButton(pushButton);
+                    tableau->setCellWidget(j, i, pushButton);
+                    break;
+                    }
+                default:
+                    break;
+                }
+            }
+        }
+
     }
 
     tableau->setVerticalHeaderLabels(titre_ligne);
@@ -352,4 +424,110 @@ void FenetrePrincipale::Affichage_fenetres_annexes(QAbstractButton * button)
     /* Instanciation de la boîte de dialogue Cartographie */
     DialogCarto *dialog_carto = new DialogCarto(station_choisie, hauteur_crue);
     dialog_carto->show();
+}
+
+void FenetrePrincipale::Menu_arretes_prefectoraux(void)
+{
+    QAction * act = qobject_cast<QAction *>(sender());
+    QString arrete = act->text().replace(' ', '_');
+
+    QUrl url("file:///databank/hydrometeorologie/arretes_prefectoraux/" + arrete + ".pdf");
+    QUrl urlFichier = QUrl::fromLocalFile(QCoreApplication::applicationDirPath() + url.toLocalFile());
+    QDesktopServices::openUrl(urlFichier);
+}
+
+void FenetrePrincipale::Affichage_menu_sites_web(void)
+{
+    /* Ouverture et lecture du fichier contenant la liste des sites Web*/
+    FichierCsv *fichier = new FichierCsv("/databank/reseau/sites_web");
+    fichier->Lire();
+
+    /* Insertion des menus-actions 'sites Web' */
+    QList<QAction *> sites;
+    for (int i(1); i < fichier->matrix.size(); ++i){
+            QAction * action = new QAction(fichier->matrix[i][0]); // nom générique du site
+            action->setWhatsThis(fichier->matrix[i][1]);           // adresse internet du site
+            QIcon icon(QCoreApplication::applicationDirPath() + "/databank/pictogramme/" + fichier->matrix[i][2]);
+            action->setIcon(icon);
+            sites.append(action);
+        }
+    ui->menu_sites_web->addActions(sites);
+    delete fichier;
+}
+
+void FenetrePrincipale::Menu_sites_web(QAction * action)
+{
+    QDesktopServices::openUrl(QUrl(action->whatsThis()));
+}
+
+
+void FenetrePrincipale::Affichage_menu_crues_historiques(void)
+{
+    /* Liste des cours d'eau avec historiques de crues par bassin versant */
+    QMap<QString, QSet<QString>> cours_d_eau_par_bv;
+
+    for (int i(0); i < stations_hydro.size(); ++i)
+        if (!stations_hydro[i]->Historique_crue().isEmpty())
+            cours_d_eau_par_bv[stations_hydro[i]->Bassin_versant()].insert(stations_hydro[i]->Entite_hydrologique().second);
+
+    /* Insertion des menus 'bassins versants' et de leurs actions 'cours d'eau' */
+    for (QMap<QString, QSet<QString>>::const_iterator it_m = cours_d_eau_par_bv.cbegin(); it_m != cours_d_eau_par_bv.cend(); ++it_m){
+        QList<QAction *> cours_d_eau;
+        for(QSet<QString>::const_iterator it_s = it_m.value().cbegin(); it_s != it_m.value().cend(); ++it_s){
+            QAction * action = new QAction(*it_s);  // nom du cours d'eau
+            action->setWhatsThis(it_m.key());       // nom du bassin versant
+            QIcon icon(QCoreApplication::applicationDirPath() + "/databank/pictogramme/" + it_m.key() + ".png");
+            action->setIcon(icon);
+            cours_d_eau.append(action);
+        }
+        QMenu *menu = new QMenu();
+        menu->setTitle(it_m.key());
+        QIcon icon(QCoreApplication::applicationDirPath() + "/databank/pictogramme/bv_"+ it_m.key() +".png");
+        menu->setIcon(icon);
+        menu->addActions(cours_d_eau);
+        ui->menu_crues_historiques->addMenu(menu);
+    }
+}
+
+void FenetrePrincipale::Menu_crues_historiques(QAction * action)
+{
+    QString textMessage("");
+    static QMap<QString, QString> couleur; couleur.insert("Vert","lightGreen"); couleur.insert("Jaune","yellow");
+                                           couleur.insert("Orange","orange"); couleur.insert("Rouge","red");
+
+    for (int i(0); i < stations_hydro.size(); ++i)
+        if (stations_hydro[i]->Bassin_versant() == action->whatsThis() &&
+                stations_hydro[i]->Entite_hydrologique().second == action->text() &&
+                !stations_hydro[i]->Historique_crue().isEmpty()){
+            textMessage.append(QString("Cours d'eau : <b>%1</b> - Station <b>%2</b><br><br>")
+                                            .arg(stations_hydro[i]->Entite_hydrologique().second)
+                                            .arg(stations_hydro[i]->Identifiant().second));
+            for (QMap<double, QPair<QDate, QString>>::const_iterator it = stations_hydro[i]->Historique_crue().cbegin(); it != stations_hydro[i]->Historique_crue().cend(); ++it)
+                textMessage.append(QString("<span style='background-color:%1'><b>%2</b> - Hauteur d'eau : <b>%L3 m</b></span><br>")
+                                                   .arg(couleur[it.value().second])
+                                                   .arg(it.value().first.toString("MMMM yyyy"))
+                                                   .arg(it.key() /1000, 0, 'f', 2));
+            textMessage.append("<br>");
+        }
+
+    /* Affichage du texte dans la MessagBox */
+    QMessageBox msgBox;
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.setWindowTitle(ui->menu_crues_historiques->title());
+    msgBox.setText(textMessage);
+    msgBox.exec();
+}
+
+void FenetrePrincipale::Menu_aide(void)
+{
+    QAction * action = qobject_cast<QAction *>(sender());
+
+    if (action->text().contains("manuel", Qt::CaseInsensitive)){
+        QUrl url("file:///databank/documentation/manuel_utilisation.pdf");
+        QUrl urlFichier = QUrl::fromLocalFile(QCoreApplication::applicationDirPath() + url.toLocalFile());
+        QDesktopServices::openUrl(urlFichier);
+    }
+    else
+        QDesktopServices::openUrl(QUrl(action->whatsThis()));
+
 }
