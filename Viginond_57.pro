@@ -19,6 +19,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     dialog_cartographie.cpp \
+    dialog_proxy.cpp \
     fichier.cpp \
     graphique.cpp \
     main.cpp \
@@ -28,6 +29,7 @@ SOURCES += \
 
 HEADERS += \
     dialog_cartographie.h \
+    dialog_proxy.h \
     fenetre_principale.h \
     fichier.h \
     graphique.h \
@@ -37,6 +39,7 @@ HEADERS += \
 
 FORMS += \
     dialog_cartographie.ui \
+    dialog_proxy.ui \
     fenetre_principale.ui
 
 # Default rules for deployment.

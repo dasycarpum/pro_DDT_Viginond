@@ -15,7 +15,7 @@ class Proxy : public QNetworkProxy
     QMap<QString, QList<QString>> proxies;      // liste des proxies préenregistrés, par site client (DDT, Préfecture, ...)
 
 public:
-    Proxy();
+    Proxy(QString const&);
     ~Proxy(){}
 
     QMap<QString, QList<QString>> Proxies(void) const {return proxies;}
