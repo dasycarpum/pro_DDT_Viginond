@@ -28,17 +28,17 @@
      </property>
      <item>
       <property name="text">
-       <string>HTTP transparent</string>
+       <string>(3) HTTP transparent - par défaut</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>HTTP caché</string>
+       <string>(4) HTTP caché</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Socks 5</string>
+       <string>(2) Socks 5</string>
       </property>
      </item>
     </widget>

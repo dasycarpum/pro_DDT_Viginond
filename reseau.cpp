@@ -67,10 +67,10 @@ void Reseau::Reponse_terminee(QNetworkReply * reponse)
 
 /** Constructeur
     ============ */
-Proxy::Proxy()
+Proxy::Proxy(QString const& nom_fichier)
 {
     /* Ouverture et lecture du fichier contenant la liste des proxies préenregistrés */
-    FichierCsv *fichier = new FichierCsv("/databank/reseau/proxy");
+    FichierCsv *fichier = new FichierCsv(nom_fichier);
     fichier->Lire();
 
     for (int i(1); i < fichier->matrix.size(); ++i){

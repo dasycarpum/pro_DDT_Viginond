@@ -95,13 +95,19 @@ void FenetrePrincipale::Telechargement_Vigicrues(void)
 {
     if (acces_internet){
         /* Configuration du proxy pour connexion à un réseau protégé */
-        Proxy * proxy = new Proxy();
         QString site(Selection_proxy());
+        QString emplacement;
+        site == "Configuration" ? emplacement = "C:/temp/proxy" : emplacement = "/databank/reseau/proxy";
+
+        Proxy * proxy = new Proxy(emplacement);
         if (site != "Aucun"){
             proxy->setType(QNetworkProxy::ProxyType(proxy->Proxies()[site][0].toInt()));
             proxy->setHostName(proxy->Proxies()[site][1]);
             proxy->setPort(quint16(proxy->Proxies()[site][2].toUInt()));
+            proxy->setUser(proxy->Proxies()[site][3]);
+            proxy->setPassword(proxy->Proxies()[site][4]);
         }
+        qDebug() << proxy->type() << proxy->hostName() << proxy->port() << proxy->user() << proxy->password();
 
         /* Boucle sur les stations hydro */
         for (int i(0); i < stations_hydro.size(); ++i){

@@ -16,9 +16,8 @@ class FichierCsv : public QFile
 public:
     QVector<QVector<QString>> matrix;   // matrice de stockage des attributs, indexée [ligne][colonne]
 
-    FichierCsv(QString const& nom, QString const& sep = ";") :
-        extension(".csv"), separateur(sep)
-        {setFileName(QCoreApplication::applicationDirPath() + nom + extension);}
+    FichierCsv(QString const& nom, QString const& sep = ";") : extension(".csv"), separateur(sep)
+        {setFileName((nom[1] == ":" ? "" : QCoreApplication::applicationDirPath()) + nom + extension);}
     ~FichierCsv(){}
 
     void Lire(void);
@@ -36,6 +35,5 @@ public:
 
     static QVector<QVector<QString>> Lecture_valeur(const QByteArray &, QList<QString> const&);
 };
-
 
 #endif // FICHIER_H
