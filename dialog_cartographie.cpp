@@ -196,7 +196,7 @@ void DialogCarto::Customisation_projet_QGiS(void)
 
     QFile fichier(chemin);
     if (!fichier.open(QIODevice::WriteOnly))
-        qDebug() << chemin;
+        QMessageBox::critical(nullptr, "Oups !", "Impossible d'ouvrir le fichier "  + chemin);
 
     QTextStream texte(&fichier);
 

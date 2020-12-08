@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1024</width>
-    <height>815</height>
+    <height>720</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,8 @@
   <widget class="QWidget" name="centralwidget">
    <property name="minimumSize">
     <size>
-     <width>1024</width>
-     <height>768</height>
+     <width>0</width>
+     <height>0</height>
     </size>
    </property>
    <layout class="QGridLayout" name="gridLayout" columnstretch="1,3">
@@ -190,6 +190,12 @@
          <property name="minimumSize">
           <size>
            <width>0</width>
+           <height>260</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
            <height>260</height>
           </size>
          </property>
