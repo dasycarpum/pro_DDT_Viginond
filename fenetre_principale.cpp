@@ -20,6 +20,10 @@ FenetrePrincipale::FenetrePrincipale(QWidget *parent)
     QPalette palette; palette.setColor(QPalette::Button, QColor(133, 163, 195));
     ui->pushButton_telechargement->setPalette(palette);
 
+    QScreen *screen = QGuiApplication::primaryScreen();
+    QRect  screenGeometry = screen->geometry();
+    hauteur_ecran = screenGeometry.height();
+
     /* Test d'un accès au réseau internet */
     acces_internet = false;
     Reseau *reseau = new Reseau();
@@ -107,7 +111,6 @@ void FenetrePrincipale::Telechargement_Vigicrues(void)
             proxy->setUser(proxy->Proxies()[site][3]);
             proxy->setPassword(proxy->Proxies()[site][4]);
         }
-        qDebug() << proxy->type() << proxy->hostName() << proxy->port() << proxy->user() << proxy->password();
 
         /* Boucle sur les stations hydro */
         for (int i(0); i < stations_hydro.size(); ++i){
@@ -232,6 +235,8 @@ void FenetrePrincipale::Affichage_graphique(QString const& bassin_versant, QStri
     graph_entite_hydro->setTitle("Bassin versant " + bassin_versant + " - cours d'eau " +  cours_d_eau);
     graph_entite_hydro->setAxisTitle(QwtPlot::yLeft, "Hauteur eau (mm)");
     graph_entite_hydro->setCanvasBackground(QBrush(QColor("#e5e6e2")));
+    if (hauteur_ecran <= 800)
+        graph_entite_hydro->setMaximumHeight(340);
 
     /* Gestion du zoom et de l'étiquette mobile de données */
     Zoom* zoom = new Zoom( graph_entite_hydro->canvas() );

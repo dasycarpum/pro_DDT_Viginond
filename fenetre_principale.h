@@ -11,6 +11,7 @@
 #include <QHeaderView>
 #include <QComboBox>
 #include <QDesktopServices>
+#include <QScreen>
 
 #include "reseau.h"
 #include "fichier.h"
@@ -28,6 +29,7 @@ class FenetrePrincipale : public QMainWindow
     Q_OBJECT
     Ui::FenetrePrincipale *ui;
 
+    int hauteur_ecran;                      // hauteur en pixel de l'écran utilisateur
     bool acces_internet;                    // accès au réseau internet disponible (avec ou sans proxy)
     QList<StationHydro *> stations_hydro;   // liste de toutes les stations hydrométriques
     QButtonGroup *grp_radioButton_bassin;   // tous les bassins versants (sous forme de QRadioButton) - dans 1 QGroupBox
