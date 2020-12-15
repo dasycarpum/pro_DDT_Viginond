@@ -52,6 +52,7 @@ class DialogCarto : public QDialog
 
     const StationHydro * station_hydro;                     // Station hydrométrique retenue par l'utilisateur
     const double hauteur_crue;                              // modèle de hauteur de crue choisie par l'utilisateur
+    bool acces_internet;
 
     QMap<Serveur_wms, QList<Couche_wms>> infos_Wms;         // liste des couches WMS disponibles par serveurs
     QList<QPair<QString, bool>> infos_sig_enjeux;           // liste des couches SIG de type vecteur (enjeux)

@@ -15,9 +15,15 @@ DialogCarto::DialogCarto(const StationHydro * s,  double h, QWidget *parent) :
     ui->groupBox_inondation->setStyleSheet("QGroupBox#box { font-weight:bold }");
 
     /* Test d'un accès au réseau internet et aux serveurs cartographiques */
-   Affichage_infos_WMS();
-   /* Liste des couches SIG disponibles pour l'analyse de crue  (selon station et hauteur de crue) */
-   Affichage_infos_SIG();
+    acces_internet = false;
+    Reseau *reseau = new Reseau();
+    if (reseau->Test_connexion(ui->textBrowser_information)){
+        acces_internet = true;
+        Affichage_infos_WMS();
+    }
+    delete  reseau;
+    /* Liste des couches SIG disponibles pour l'analyse de crue  (selon station et hauteur de crue) */
+    Affichage_infos_SIG();
 
     /* Gestion des boutons de la boîte de dialogue */
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(Affichage_QGiS()));
@@ -48,9 +54,8 @@ void DialogCarto::Affichage_infos_WMS(void)
         infos_Wms[serveur].push_back(couche);
     }
 
-    /* Affichage des tests d'accès à internet et aux serveurs (QTextBrowser) */
+    /* Affichage des tests d'accès aux serveurs (QTextBrowser) */
     Reseau *reseau = new Reseau();
-    reseau->Test_connexion(ui->textBrowser_information);    // test de connexion à internet (Google)
 
     QMap<Serveur_wms, QList<Couche_wms>> infos_Wms_modif;
     for (QMap<Serveur_wms, QList<Couche_wms>>::const_iterator it = infos_Wms.cbegin(); it != infos_Wms.cend(); ++it)
@@ -210,7 +215,7 @@ void DialogCarto::Customisation_projet_QGiS(void)
     texte << "qgs = QgsApplication([], False)" << endl;
     texte << "qgs.initQgis()" << endl;
     texte << "project = QgsProject.instance()" << endl;
-    texte << "project.read(\"" + QCoreApplication::applicationDirPath() + "/databank/cartographie/projet_qgis.qgz\")" << endl;
+    texte << "project.read(\"" + QCoreApplication::applicationDirPath() + QString("/databank/cartographie/projet_qgis%1.qgz\")").arg(acces_internet ? "" : "_deconnecte") << endl;
     /* Vue carto localisée sur le secteur géographique de la station hydro */
     texte << "qgis.utils.iface.mapCanvas().setExtent(QgsRectangle(" << station_hydro->Emprise_communale().second[0] << ","
                                                                     << station_hydro->Emprise_communale().second[1] << ","
@@ -220,17 +225,19 @@ void DialogCarto::Customisation_projet_QGiS(void)
     texte << "lambert93 = QgsCoordinateReferenceSystem(2154, QgsCoordinateReferenceSystem.PostgisCrsId)\n"
              "qgis.utils.iface.mapCanvas().setDestinationCrs(lambert93)" << endl;
     /* Référentiels WMS */
-    Choix_referentiel_WMS();
-    for (QMap<Serveur_wms, QList<Couche_wms>>::const_iterator it = infos_Wms.cbegin(); it != infos_Wms.cend(); ++it)
-        for (int i(0); i < it.value().size(); ++i)
-            if (it.value()[i].choix_utilisateur){
-                texte << QString("uri = 'crs=EPSG:2154&featureCount=10&format=%1&layers=%2&styles=&url=https://%3'")
-                         .arg(it.value()[i].format_image)
-                         .arg(it.value()[i].adresse)
-                         .arg(it.key().adresse) << endl;
-                texte << QString("qgis.utils.iface.addRasterLayer(uri, '%1', 'wms')")
-                         .arg(it.value()[i].denomination).toUtf8() << endl;
-            }
+    if (acces_internet){
+        Choix_referentiel_WMS();
+        for (QMap<Serveur_wms, QList<Couche_wms>>::const_iterator it = infos_Wms.cbegin(); it != infos_Wms.cend(); ++it)
+            for (int i(0); i < it.value().size(); ++i)
+                if (it.value()[i].choix_utilisateur){
+                    texte << QString("uri = 'crs=EPSG:2154&featureCount=10&format=%1&layers=%2&styles=&url=https://%3'")
+                             .arg(it.value()[i].format_image)
+                             .arg(it.value()[i].adresse)
+                             .arg(it.key().adresse) << endl;
+                    texte << QString("qgis.utils.iface.addRasterLayer(uri, '%1', 'wms')")
+                             .arg(it.value()[i].denomination).toUtf8() << endl;
+                }
+    }
     /* Couches SIG de type vecteur (enjeux et ZIP-ZICH) */
     Choix_couche_SIG();
     QList<QList<QPair<QString, bool>>> infos_sig; infos_sig << infos_sig_enjeux << infos_sig_zip;
